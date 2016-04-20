@@ -1,0 +1,8 @@
+Ast.cmo :
+Ast.cmx :
+Parser.cmo :
+Parser.cmx :
+Unify.cmo : Ast.cmo
+Unify.cmx : Ast.cmx
+Driver.cmo : Unify.cmo Parser.cmo Ast.cmo
+Driver.cmx : Unify.cmx Parser.cmx Ast.cmx
