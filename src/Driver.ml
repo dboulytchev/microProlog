@@ -2,15 +2,7 @@ open GT
 open Checked
 
 let _ = 
-  let database =
-    let clauses : Ast.clause list ref = ref [] in
-    object
-      method add (c : Ast.clause) = clauses := c :: !clauses
-      method show =
-	List.iter (fun c -> Printf.printf "%s\n" (Ostap.Pretty.toString (Ast.pretty_clause c))) !clauses
-      method clear = clauses := []
-    end
-  in
+  let database = new Database.c in
   let doCommand = function
   | `Quit         -> exit 0
   | `Clear        -> database#clear
@@ -18,8 +10,17 @@ let _ =
   | `Show         -> database#show
   | `Unify (x, y) -> 
       Printf.printf "%s\n" 
-	(Ostap.Pretty.toString (Unify.pretty_subst (Unify.unify Unify.empty x y)))
-  | `Query  _     -> ()
+	(Ostap.Pretty.toString (Unify.pretty_subst (Unify.unify (Some Unify.empty) x y)))
+  | `Query goal   -> 
+       let rec iterate stack =
+	 match SLD.solve database stack with
+	 | `End -> Printf.printf "No (more) answers.\n"
+	 | `Answer (s, stack) ->
+	     Printf.printf "%s\n" (Ostap.Pretty.toString (Unify.pretty_subst (Some s)));
+	     Printf.printf "Continue (y/n)? ";
+             let a = read_line () in
+	     if a = "y" || a = "Y" then iterate stack
+       in iterate [goal, Unify.empty]
   in
   while true do
     Printf.printf "> ";

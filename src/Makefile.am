@@ -2,7 +2,7 @@ PACKAGE := MicroProlog
 SUBDIRS = 
 
 # type in sources here
-SOURCES = Ast.ml Parser.ml Unify.ml Driver.ml
+SOURCES = Ast.ml Parser.ml Unify.ml Database.ml SLD.ml Driver.ml
 MLI = 
 
 include $(top_srcdir)/m4/Makefile.am.vars

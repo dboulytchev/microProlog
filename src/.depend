@@ -4,5 +4,9 @@ Parser.cmo :
 Parser.cmx :
 Unify.cmo : Ast.cmo
 Unify.cmx : Ast.cmx
-Driver.cmo : Unify.cmo Parser.cmo Ast.cmo
-Driver.cmx : Unify.cmx Parser.cmx Ast.cmx
+Database.cmo : Unify.cmo Ast.cmo
+Database.cmx : Unify.cmx Ast.cmx
+SLD.cmo : Unify.cmo Ast.cmo
+SLD.cmx : Unify.cmx Ast.cmx
+Driver.cmo : Unify.cmo SLD.cmo Parser.cmo Database.cmo
+Driver.cmx : Unify.cmx SLD.cmx Parser.cmx Database.cmx
