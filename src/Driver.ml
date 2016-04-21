@@ -9,6 +9,12 @@ let _ =
   | `Clear        -> database#clear
   | `Clause c     -> database#add c
   | `Show         -> database#show
+  | `Load f       -> 
+      let f = String.sub f 1 (String.length f - 2) in
+      (match Parser.Lexer.fromString Parser.spec (Ostap.Util.read f) with
+       | Ok clauses  -> List.iter database#add clauses
+       | Fail (m::_) -> Printf.printf "Syntax error: %s\n" (Ostap.Msg.toString m)
+      )
   | `Unify (x, y) -> 
       Printf.printf "%s\n" 
 	(Ostap.Pretty.toString (Unify.pretty_subst (Unify.unify (Some Unify.empty) x y)))

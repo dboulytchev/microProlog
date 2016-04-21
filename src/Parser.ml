@@ -1,7 +1,7 @@
 module Lexer =
   struct
 
-    let keywords = ["quit"; "clear"; "show"]
+    let keywords = ["quit"; "clear"; "show"; "unify"; "help"; "load"]
 
     let r = Ostap.Matcher.Token.repr
 
@@ -13,7 +13,8 @@ module Lexer =
     ostap (
       ident  : x:IDENT =>{not (is_keyword (r x))}=> {r x};
       var    : x:VAR   =>{not (is_keyword (r x))}=> {r x};
-      literal: x:LITERAL {int_of_string (r x)} 
+      literal: x:LITERAL {int_of_string (r x)}; 
+      string : x:STRING  {r x} 
     )
 
     class t s = 
@@ -27,12 +28,14 @@ module Lexer =
       let ident   = Re_str.regexp "[a-z]\([a-zA-Z_0-9]\)*\\b" in 
       let var     = Re_str.regexp "[A-Z]\([a-zA-Z_0-9]\)*\\b" in 
       let literal = Re_str.regexp "-?[0-9]+" in
+      let string  = Re_str.regexp "\"[^\"]*\"" in
       object (self)
         inherit Ostap.Matcher.t s 
         method skip p coord = skip s p coord
         method getIDENT     = self#get "identifier" ident
         method getVAR       = self#get "variable"   var
-        method getLITERAL   = self#get "literal"    literal         
+        method getLITERAL   = self#get "literal"    literal
+	method getSTRING    = self#get "string"     string        
       end
 
     exception Error of Ostap.Msg.t
@@ -52,6 +55,7 @@ module Lexer =
 ostap (
   ident     : !(Lexer.ident);
   var       : !(Lexer.var);
+  string    : !(Lexer.string);
   key[name] : @(name ^ "\\b" : name);
   term      : x:var {`Var x} | f:ident a:(-"(" !(Ostap.Util.list term) -")")? {
     `Functor (f, match a with Some a -> a | None -> [])
@@ -78,6 +82,8 @@ ostap (
   | key["clear"]                   {`Clear}
   | key["show"]                    {`Show}
   | key["unify"] x:term y:term     {`Unify x y}
+  | key["load"]  s:string          {`Load s}
   | c:clause                       {`Clause c}
-  | "?" a:!(Ostap.Util.list atom)  {`Query a}
+  | "?" a:!(Ostap.Util.list atom)  {`Query a};
+  spec: clause+ -EOF
 )
