@@ -4,6 +4,7 @@ open Checked
 let _ = 
   let database = new Database.c in
   let doCommand = function
+  | `Empty        -> ()
   | `Quit         -> exit 0
   | `Clear        -> database#clear
   | `Clause c     -> database#add c
@@ -11,16 +12,27 @@ let _ =
   | `Unify (x, y) -> 
       Printf.printf "%s\n" 
 	(Ostap.Pretty.toString (Unify.pretty_subst (Unify.unify (Some Unify.empty) x y)))
-  | `Query goal   -> 
-       let rec iterate stack =
-	 match SLD.solve database stack with
-	 | `End -> Printf.printf "No (more) answers.\n"
-	 | `Answer (s, stack) ->
-	     Printf.printf "%s\n" (Ostap.Pretty.toString (Unify.pretty_subst (Some s)));
-	     Printf.printf "Continue (y/n)? ";
-             let a = read_line () in
-	     if a = "y" || a = "Y" then iterate stack
-       in iterate [goal, Unify.empty]
+  | `Query goal ->
+      let vars = Ast.vars goal in 
+      let rec iterate stack =
+        match SLD.solve database stack with
+        | `End -> Printf.printf "No (more) answers.\n"
+        | `Answer (s, stack) ->
+	    (match vars with
+	     | [] -> Printf.printf "yes\n"
+	     | _  -> 
+		List.iter 
+		   (fun x ->
+		      Printf.printf "%s = %s\n" 
+                        x
+                        (Ostap.Pretty.toString (Ast.pretty_term (Unify.walk' s (`Var x)))) 
+                   ) 
+		   vars
+            );
+            Printf.printf "Continue (y/n)? ";
+            let a = read_line () in
+	    if a = "y" || a = "Y" then iterate stack
+      in iterate [(goal :> Ast.body_item list), Unify.empty]
   in
   while true do
     Printf.printf "> ";

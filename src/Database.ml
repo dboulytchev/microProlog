@@ -17,14 +17,26 @@ class c =
 	   let module M = Map.Make (String) in
 	   let m = ref M.empty in
            let rename a =
-	     GT.transform(Ast.atom) 
-               (object inherit [Ast.atom] @Ast.atom[gmap] 
-                  method c_Var _ _ x = 
-		    try `Var (M.find x !m)
-		    with Not_found ->
-		      let x' = name x in
-		      m := M.add x x' !m;
-		      `Var x'
+	     GT.transform(Ast.atom)              
+               (object inherit [Ast.atom] @Ast.atom[gmap]
+                  method c_Functor _ _ f ts =
+                    `Functor (
+                       f,
+                       GT.gmap(GT.list)
+                          (GT.transform(Ast.term)
+                              (object inherit [Ast.term] @Ast.term[gmap]        
+                                 method c_Var _ _ x = 
+		                   try `Var (M.find x !m)
+		                   with Not_found ->
+		                     let x' = name x in
+		                     m := M.add x x' !m;
+		                     `Var x'
+			       end
+			      )
+                              ()
+                          )
+                          ts 
+                     )
                 end) 
 	       ()
 	       a

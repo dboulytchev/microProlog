@@ -72,11 +72,12 @@ ostap (
 )
 
 ostap (
-  main: 
-    key["quit"]                   {`Quit}
-  | key["clear"]                  {`Clear}
-  | key["show"]                   {`Show}
-  | key["unify"] x:term y:term    {`Unify x y}
-  | c:clause                      {`Clause c}
-  | "?" a:!(Ostap.Util.list atom) {`Query a}
+  main: i:item? EOF {match i with Some i -> i | _ -> `Empty};
+  item:
+    key["quit"]                    {`Quit}
+  | key["clear"]                   {`Clear}
+  | key["show"]                    {`Show}
+  | key["unify"] x:term y:term     {`Unify x y}
+  | c:clause                       {`Clause c}
+  | "?" a:!(Ostap.Util.list atom)  {`Query a}
 )

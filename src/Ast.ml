@@ -66,3 +66,24 @@ class pretty_clause =
   end
 
 let pretty_clause c = GT.transform(clause) (new pretty_clause) () c
+
+let vars atoms =
+  let module S = Set.Make (String) in
+  S.elements @@
+  GT.foldl(GT.list) 
+    (GT.transform(atom)
+       (object inherit [S.t] @atom[foldl]
+          method c_Functor s _ _ ts =
+            GT.foldl(GT.list)
+               (GT.transform(term)
+		  (object inherit [S.t] @term[foldl]
+                     method c_Var s _ x = S.add x s
+		   end)
+	       )
+               s
+	       ts
+        end
+       )
+    ) 
+    S.empty 
+    atoms
