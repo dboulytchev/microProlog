@@ -209,7 +209,7 @@ target_vendor = @target_vendor@
 SUBDIRS = 
 
 # type in sources here
-SOURCES = Ast.ml Parser.ml Unify.ml Database.ml SLD.ml Driver.ml
+SOURCES = Ast.ml Parser.ml Unify.ml Env.ml SLD.ml Driver.ml
 MLI = 
 
 # define macros that creates directiries

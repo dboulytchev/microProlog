@@ -11,21 +11,21 @@
 
 @type clause = [ `Clause of atom * body ] with gmap, foldl, show
 
-let to_term : atom -> term = fun a -> (a :> term)
-
 class pretty_term =
   object inherit [unit, Ostap.Pretty.printer] @term
-    method c_Var     _ _ s = Ostap.Pretty.string s
+    method c_Var _ _ s = Ostap.Pretty.string s
     method c_Functor _ s f ts = 
       Ostap.Pretty.listBySpace [
         Ostap.Pretty.string f;
         match ts with
         | [] -> Ostap.Pretty.empty
         | ys -> Ostap.Pretty.rboxed (Ostap.Pretty.listByComma (List.map (s.GT.f ()) ts))
-      ]
+      ]        
   end
 
 let pretty_term t = GT.transform(term) (new pretty_term) () t
+
+let to_term : atom -> term = fun a -> (a :> term)
 
 class pretty_atom =
   object inherit [unit, Ostap.Pretty.printer] @atom

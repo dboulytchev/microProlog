@@ -7,13 +7,14 @@ let empty = M.empty
 let pretty_subst = function
 | None   -> Ostap.Pretty.string "fail"
 | Some m ->
-    Ostap.Pretty.listByBreak @@
+    Ostap.Pretty.seq @@
     List.map 
       (fun (x, t) -> 
 	 Ostap.Pretty.listBySpace [
 	   Ostap.Pretty.string x; 
 	   Ostap.Pretty.string "="; 
-	   Ast.pretty_term t
+	   Ast.pretty_term t;
+	   Ostap.Pretty.newline
          ]
       )
       (M.bindings m)

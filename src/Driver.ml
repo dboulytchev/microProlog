@@ -2,17 +2,21 @@ open GT
 open Checked
 
 let _ = 
-  let database = new Database.c in
+  let env = new Env.c in
   let doCommand = function
-  | `Empty        -> ()
-  | `Quit         -> exit 0
-  | `Clear        -> database#clear
-  | `Clause c     -> database#add c
-  | `Show         -> database#show
-  | `Load f       -> 
+  | `TraceOn  -> env#trace_on
+  | `TraceOff -> env#trace_off
+  | `BFS      -> env#bfs
+  | `DFS      -> env#dfs
+  | `Empty    -> ()
+  | `Quit     -> exit 0
+  | `Clear    -> env#clear
+  | `Clause c -> env#add c
+  | `Show     -> env#show
+  | `Load f   -> 
       let f = String.sub f 1 (String.length f - 2) in
       (match Parser.Lexer.fromString Parser.spec (Ostap.Util.read f) with
-       | Ok clauses  -> List.iter database#add clauses
+       | Ok clauses  -> List.iter env#add clauses
        | Fail (m::_) -> Printf.printf "Syntax error: %s\n" (Ostap.Msg.toString m)
       )
   | `Unify (x, y) -> 
@@ -21,8 +25,8 @@ let _ =
   | `Query goal ->
       let vars = Ast.vars goal in 
       let rec iterate stack =
-        match SLD.solve database stack with
-        | `End -> Printf.printf "No (more) answers.\n"
+        match SLD.solve env stack with
+        | `End -> Printf.printf "No (more) answers.\n%!"
         | `Answer (s, stack) ->
 	    (match vars with
 	     | [] -> Printf.printf "yes\n"
