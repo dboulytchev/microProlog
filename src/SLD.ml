@@ -2,7 +2,23 @@ type goal  = Ast.body_item list
 type state = goal * Unify.subst
 type stack = state list
 
-let rec solve_dfs env = function
+let pretty_goal goal = Ostap.Pretty.listByComma @@ GT.gmap(GT.list) Ast.pretty_body_item goal
+
+let pretty_state (goal, subst) =
+  Ostap.Pretty.seq [
+    pretty_goal goal;
+    Ostap.Pretty.newline;
+    Unify.pretty_subst (Some subst) 
+  ]
+
+let pretty_stack stack = Ostap.Pretty.seq @@
+  GT.gmap(GT.list) (fun s -> Ostap.Pretty.seq [pretty_state s; Ostap.Pretty.newline]) stack
+
+let rec solve_dfs env stack = 
+  env#trace "Stack:";
+  env#trace (Ostap.Pretty.toString (pretty_stack stack));
+  env#wait;
+  match stack with
   | [] -> `End
   | (goal, subst)::stack ->
       (match goal with
@@ -22,7 +38,11 @@ let rec solve_dfs env = function
           )
       )
 
-let rec solve_bfs env = function
+let rec solve_bfs env frontier = 
+  env#trace "Frontier:";
+  env#trace (Ostap.Pretty.toString (pretty_stack frontier));
+  env#wait;
+  match frontier with
   | [] -> `End
   | frontier ->
       let answers, rest = List.partition (function ([], _) -> true | _ -> false) frontier in

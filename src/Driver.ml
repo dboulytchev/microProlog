@@ -1,7 +1,10 @@
 open GT
 open Checked
 
+exception User_interrupt
+
 let _ = 
+  Sys.signal Sys.sigint (Sys.Signal_handle (fun _ -> raise User_interrupt));
   let env = new Env.c in
   let doCommand = function
   | `TraceOn  -> env#trace_on
@@ -45,15 +48,19 @@ let _ =
       in iterate [(goal :> Ast.body_item list), Unify.empty]
   in
   while true do
-    Printf.printf "> ";
-    match Parser.Lexer.fromString Parser.main (read_line ()) with
-    | Ok command -> doCommand command
-    | Fail (m::_) -> 
-	(match Ostap.Msg.loc m with
-	 | Ostap.Msg.Locator.Point (1, n) -> 
-             Printf.printf "%s^\n" (String.make (n-1) ' ')
-	 | _ -> ()
-	);
-	Printf.printf "Syntax error: %s\n" (Ostap.Msg.toString m)
+    try
+      Printf.printf "> ";
+      match Parser.Lexer.fromString Parser.main (read_line ()) with
+      | Ok command -> doCommand command
+      | Fail (m::_) ->   
+         (match Ostap.Msg.loc m with
+	  | Ostap.Msg.Locator.Point (1, n) -> 
+              Printf.printf "%s^\n" (String.make (n-1) ' ')
+	  | _ -> ()
+	 );
+	 Printf.printf "Syntax error: %s\n" (Ostap.Msg.toString m)
+    with
+    | User_interrupt -> Printf.printf "Interrupted\n"
+    | exc -> Printf.printf "%s\n" (Printexc.to_string exc)
   done
 

@@ -6,7 +6,8 @@ class c =
     val trace = ref false
     method trace_on  = trace := true
     method trace_off = trace := false
-    method trace s = if !trace then (Printf.printf "%s\n%!" s; ignore (read_line ()))
+    method trace s = if !trace then Printf.printf "%s\n%!" s
+    method wait = if !trace then ignore (read_line ())
     method bfs = dfs := false
     method dfs = dfs := true  
     method is_dfs = !dfs
@@ -15,10 +16,9 @@ class c =
       List.iter (fun c -> Printf.printf "%s\n" (Ostap.Pretty.toString (Ast.pretty_clause c))) !clauses
     method clear = clauses := []
     method find (a : Ast.atom) (s : Unify.subst) = 
-      self#trace (Printf.sprintf "Finding definitive clause for %s" (Ostap.Pretty.toString (Ast.pretty_atom a)));
       let name = 
 	let i = !index in
-	fun s -> Printf.sprintf "%d_%s" i s 
+	fun s -> Printf.sprintf "$%d_%s" i s 
       in
       incr index;
       let found =
@@ -67,19 +67,13 @@ class c =
 	  !clauses 
           []
       in
-      self#trace "Found:\n";
-      List.iter (
-        fun (s, items) -> 
-          self#trace (Ostap.Pretty.toString (Unify.pretty_subst (Some s))); 
-          self#trace (Ostap.Pretty.toString (Ostap.Pretty.listByBreak (GT.gmap(GT.list) Ast.pretty_body_item items)));
-      ) found;
       let rec pull = function
       | []  -> []
       | [x] -> [x]
-      | ((_, []) as x) :: ((_, []) :: _) as tl -> x :: pull tl
+      | ((_, []) as x) :: (((_, []) :: _) as tl) -> x :: pull tl
       | ((_, []) as x) :: y :: tl -> y :: pull (x :: tl)
       | x::tl -> x :: pull tl
       in
-      pull found
+      pull found 
 
   end
