@@ -274,8 +274,10 @@ AM_OFLAGS = $(MODULE_INCLUDES)
 # extra .cmi to delete those are generated from .ml
 CLEAN_CMI := $(CMO:.cmo=.cmi)
 # other extra files to clean up
-CLEAN_EXTRA := .depend $(addsuffix .cmi, $(TESTS)) $(addsuffix .cmo, \
-	$(TESTS)) $(addsuffix $(EXEEXT), $(TESTS)) *.diff *.log
+
+#CLEAN_EXTRA += $(addsuffix .cmi, $(TESTS)) $(addsuffix .cmo, $(TESTS))
+#CLEAN_EXTRA += $(addsuffix $(EXEEXT), $(TESTS))
+CLEAN_EXTRA := .depend *.diff *.log
 all: all-am
 
 .SUFFIXES:

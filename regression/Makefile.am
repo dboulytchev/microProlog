@@ -22,8 +22,8 @@ OFLAGS += -rectypes
 
 TARGET = 
 
-CLEAN_EXTRA += $(addsuffix .cmi, $(TESTS)) $(addsuffix .cmo, $(TESTS))
-CLEAN_EXTRA += $(addsuffix $(EXEEXT), $(TESTS))
+#CLEAN_EXTRA += $(addsuffix .cmi, $(TESTS)) $(addsuffix .cmo, $(TESTS))
+#CLEAN_EXTRA += $(addsuffix $(EXEEXT), $(TESTS))
 CLEAN_EXTRA += *.diff *.log
 
 include $(top_srcdir)/m4/Makefile.am.targets
