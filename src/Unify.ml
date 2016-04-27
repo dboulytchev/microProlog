@@ -71,10 +71,3 @@ let rec unify : subst option -> Ast.term -> Ast.term -> subst option = fun s x y
 	   inner (Some s) (ta, tb)
 	 else None
 
-let apply : subst -> Ast.body_item -> Ast.body_item = 
-  let walk_atom subst = function
-  | `Functor (f, terms) -> `Functor (f, List.map (walk' subst) terms)
-  in
-  fun s -> function
-  | `Cut -> `Cut
-  | #Ast.atom as a -> walk_atom s a

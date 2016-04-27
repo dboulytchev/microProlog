@@ -31,7 +31,7 @@ let rec solve_dfs env stack =
 	      | [] -> solve_dfs env stack
 	      | versions ->
 	          solve_dfs env @@
-                     List.fold_left (fun stack (subst', btoms) -> (btoms @ List.map (Unify.apply subst') atoms, subst')::stack) 
+                     List.fold_left (fun stack (subst', btoms) -> (btoms @ atoms, subst')::stack) 
 		       stack
 		       versions
 	      )
@@ -64,7 +64,7 @@ let rec solve_bfs env frontier =
 		     match a with
 		     | `Cut -> invalid_arg "cut is not supported"
 		     | #Ast.atom as a ->
-                         List.map (fun (subst', btoms) -> btoms @ List.map (Unify.apply subst') atoms, subst') (env#find a subst)
+                         List.map (fun (subst', btoms) -> btoms @ atoms, subst') (env#find a subst)
 		  )
 		  variants
 	     ) 

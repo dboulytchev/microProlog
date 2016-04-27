@@ -62,7 +62,7 @@ class c =
 	     in
              match Unify.unify (Some s) (Ast.to_term a) (Ast.to_term b) with
 	     | None    -> acc
-	     | Some s' -> (s', List.map (Unify.apply s') bs)::acc
+	     | Some s' -> (s', bs)::acc
 	  )	 
 	  !clauses 
           []
