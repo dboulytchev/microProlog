@@ -1,0 +1,25 @@
+> > > X = cons ($0_H, cons ($1_H, cons ($2_H, nil)))
+Continue (y/n)? > X = a
+Continue (y/n)? X = b
+Continue (y/n)? X = c
+Continue (y/n)? > X = nil
+Y = $7_L
+Continue (y/n)? > X = nil
+Y = nil
+Continue (y/n)? > X = nil
+Continue (y/n)? X = cons ($9_H, nil)
+Continue (y/n)? X = cons ($13_H, cons ($13_H, nil))
+Continue (y/n)? X = cons ($21_H, cons ($18_H, cons ($21_H, nil)))
+Continue (y/n)? X = cons ($34_H, cons ($31_H, cons ($31_H, cons ($34_H, nil))))
+Continue (y/n)? X = cons ($53_H, cons ($50_H, cons ($46_H, cons ($50_H, cons ($53_H, nil)))))
+Continue (y/n)? X = cons ($79_H, cons ($76_H, cons ($72_H, cons ($72_H, cons ($76_H, cons ($79_H, nil))))))
+Continue (y/n)? > X = nil
+Continue (y/n)? X = cons ($84_X, nil)
+Continue (y/n)? X = cons ($88_X, cons ($88_X, nil))
+Continue (y/n)? X = cons ($89_X, cons (s ($89_X), nil))
+Continue (y/n)? X = cons ($90_X, cons (s (s ($90_X)), nil))
+Continue (y/n)? X = cons ($91_X, cons (s (s (s ($91_X))), nil))
+Continue (y/n)? X = cons ($92_X, cons (s (s (s (s ($92_X)))), nil))
+Continue (y/n)? > X = cons (o, cons (s (o), nil))
+Continue (y/n)? X = cons (s (o), cons (o, nil))
+Continue (y/n)? > 
