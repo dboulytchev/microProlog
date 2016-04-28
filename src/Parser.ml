@@ -1,7 +1,7 @@
 module Lexer =
   struct
 
-    let keywords = ["quit"; "clear"; "show"; "unify"; "help"; "load"; "dfs"; "bfs"; "trace"; "on"; "off"]
+    let keywords = ["quit"; "clear"; "show"; "unify"; "help"; "load"; "trace"; "on"; "off"; "increment"]
 
     let r = Ostap.Matcher.Token.repr
 
@@ -56,6 +56,7 @@ ostap (
   ident     : !(Lexer.ident);
   var       : !(Lexer.var);
   string    : !(Lexer.string);
+  literal   : !(Lexer.literal);
   key[name] : @(name ^ "\\b" : name);
   term      : x:var {`Var x} | f:ident a:(-"(" !(Ostap.Util.list term) -")")? {
     `Functor (f, match a with Some a -> a | None -> [])
@@ -83,10 +84,9 @@ ostap (
   | key["show"]                    {`Show}
   | key["unify"] x:term y:term     {`Unify x y}
   | key["load"]  s:string          {`Load s}
-  | key["bfs"]                     {`BFS}
-  | key["dfs"]                     {`DFS}
   | key["trace"] key["on"]         {`TraceOn}
   | key["trace"] key["off"]        {`TraceOff}
+  | key["increment"] n:literal     {`Increment n}
   | c:clause                       {`Clause c}
   | "?" a:!(Ostap.Util.list atom)  {`Query a};
   spec: clause+ -EOF

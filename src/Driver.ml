@@ -7,16 +7,15 @@ let _ =
   Sys.signal Sys.sigint (Sys.Signal_handle (fun _ -> raise User_interrupt));
   let env = new Env.c in
   let doCommand = function
-  | `TraceOn  -> env#trace_on
-  | `TraceOff -> env#trace_off
-  | `BFS      -> env#bfs
-  | `DFS      -> env#dfs
-  | `Empty    -> ()
-  | `Quit     -> exit 0
-  | `Clear    -> env#clear
-  | `Clause c -> env#add c
-  | `Show     -> env#show
-  | `Load f   -> 
+  | `TraceOn     -> env#trace_on
+  | `TraceOff    -> env#trace_off
+  | `Increment n -> env#set_increment n
+  | `Empty       -> ()
+  | `Quit        -> exit 0
+  | `Clear       -> env#clear
+  | `Clause c    -> env#add c
+  | `Show        -> env#show
+  | `Load f -> 
       let f = String.sub f 1 (String.length f - 2) in
       (match Parser.Lexer.fromString Parser.spec (Ostap.Util.read f) with
        | Ok clauses  -> List.iter env#add clauses
@@ -27,10 +26,10 @@ let _ =
 	(Ostap.Pretty.toString (Unify.pretty_subst (Unify.unify (Some Unify.empty) x y)))
   | `Query goal ->
       let vars = Ast.vars goal in 
-      let rec iterate stack =
-        match SLD.solve env stack with
+      let rec iterate conf =
+        match SLD.solve env conf with
         | `End -> Printf.printf "No (more) answers.\n%!"
-        | `Answer (s, stack) ->
+        | `Answer (s, conf) ->
 	    (match vars with
 	     | [] -> Printf.printf "yes\n"
 	     | _  -> 
@@ -44,8 +43,8 @@ let _ =
             );
             Printf.printf "Continue (y/n)? ";
             let a = read_line () in
-	    if a = "y" || a = "Y" then iterate stack
-      in iterate [(goal :> Ast.body_item list), Unify.empty]
+	    if a = "y" || a = "Y" then iterate conf
+      in iterate (env#increment, [0, (goal :> Ast.body_item list), Unify.empty], [])
   in
   while true do
     try

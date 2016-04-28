@@ -2,15 +2,14 @@ class c =
   object (self)
     val clauses : Ast.clause list ref = ref [] 
     val index = ref 0
-    val dfs = ref true
     val trace = ref false
+    val increment = ref 50
+    method increment = !increment
+    method set_increment n = increment := n
     method trace_on  = trace := true
     method trace_off = trace := false
     method trace s = if !trace then Printf.printf "%s\n%!" s
     method wait = if !trace then ignore (read_line ())
-    method bfs = dfs := false
-    method dfs = dfs := true  
-    method is_dfs = !dfs
     method add (c : Ast.clause) = clauses := c :: !clauses
     method show =
       List.iter (fun c -> Printf.printf "%s\n" (Ostap.Pretty.toString (Ast.pretty_clause c))) !clauses
