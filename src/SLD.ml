@@ -1,10 +1,10 @@
 type goal  = Ast.body_item list
-type state = int * goal * Unify.subst
-type stack = state list
+type state = int * goal * Unify.subst * stack
+and  stack = state list
 
 let pretty_goal goal = Ostap.Pretty.listByComma @@ GT.gmap(GT.list) Ast.pretty_body_item goal
 
-let pretty_state (depth, goal, subst) =
+let pretty_state (depth, goal, subst, stack) =
   Ostap.Pretty.seq [
     Ostap.Pretty.int depth;
     Ostap.Pretty.newline;
@@ -22,19 +22,19 @@ let rec solve env (bound, stack, pruned) =
   env#wait;
   match stack with
   | [] -> (match pruned with [] -> `End | _ -> solve env (bound + env#increment, pruned, []))
-  | (depth, goal, subst)::stack when depth < bound ->
+  | (depth, goal, subst, cut)::stack when depth < bound ->
       (match goal with
        | [] -> `Answer (subst, (bound, stack, pruned))
        | a::atoms ->
           (match a with
-	   | `Cut -> invalid_arg "cut not supported"
+	   | `Cut -> solve env (bound, (depth, atoms, subst, stack)::cut, pruned)
 	   | #Ast.atom as a ->
               (match env#find a subst with
 	      | [] -> solve env (bound, stack, pruned)
 	      | versions ->
 	          solve env @@ (
                      bound,
-                     List.fold_left (fun stack (subst', btoms) -> (depth + 1, btoms @ atoms, subst')::stack) 
+                     List.fold_left (fun acc (subst', btoms) -> (depth + 1, btoms @ atoms, subst', stack)::acc) 
 		       stack
 		       versions,
                      pruned

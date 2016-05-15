@@ -24,7 +24,7 @@ let _ =
   | `Unify (x, y) -> 
       Printf.printf "%s\n" 
 	(Ostap.Pretty.toString (Unify.pretty_subst (Unify.unify (Some Unify.empty) x y)))
-  | `Query goal ->
+  | `Query (`Body goal) ->
       let vars = Ast.vars goal in 
       let rec iterate conf =
         match SLD.solve env conf with
@@ -44,7 +44,7 @@ let _ =
             Printf.printf "Continue (y/n)? ";
             let a = read_line () in
 	    if a = "y" || a = "Y" then iterate conf
-      in iterate (env#increment, [0, (goal :> Ast.body_item list), Unify.empty], [])
+      in iterate (env#increment, [0, (goal :> Ast.body_item list), Unify.empty, []], [])
   in
   while true do
     try

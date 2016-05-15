@@ -10,7 +10,7 @@ class c =
     method trace_off = trace := false
     method trace s = if !trace then Printf.printf "%s\n%!" s
     method wait = if !trace then ignore (read_line ())
-    method add (c : Ast.clause) = clauses := c :: !clauses
+    method add (c : Ast.clause) = clauses := !clauses @ [c]
     method show =
       List.iter (fun c -> Printf.printf "%s\n" (Ostap.Pretty.toString (Ast.pretty_clause c))) !clauses
     method clear = clauses := []
@@ -21,9 +21,9 @@ class c =
       in
       incr index;
       let found =
-        List.rev @@
-        List.fold_right 
-	  (fun (`Clause (b, `Body bs)) acc ->
+(*        List.rev @@*)
+        List.fold_left
+	  (fun acc (`Clause (b, `Body bs)) ->
 	     let module M = Map.Make (String) in
 	     let m = ref M.empty in
              let rename a =
@@ -63,8 +63,8 @@ class c =
 	     | None    -> acc
 	     | Some s' -> (s', bs)::acc
 	  )	 
-	  !clauses 
-          []
+	  []
+	  !clauses           
       in
       let rec pull = function
       | []  -> []

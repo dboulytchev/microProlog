@@ -1,0 +1,2 @@
+> > > X = cons (move (t, c, b), cons (move (z, a, b), cons (move (t, a, c), cons (move (y, c, b), cons (move (t, b, a), cons (move (z, c, a), cons (move (t, c, b), cons (move (x, a, b), cons (move (t, a, c), cons (move (z, b, c), cons (move (t, b, a), cons (move (y, a, c), cons (move (t, c, b), cons (move (z, a, b), cons (move (t, a, c), nil)))))))))))))))
+Continue (y/n)? > 

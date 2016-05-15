@@ -88,6 +88,6 @@ ostap (
   | key["trace"] key["off"]        {`TraceOff}
   | key["increment"] n:literal     {`Increment n}
   | c:clause                       {`Clause c}
-  | "?" a:!(Ostap.Util.list atom)  {`Query a};
+  | "?" (*a:!(Ostap.Util.list atom) *) b:body {`Query b};
   spec: clause+ -EOF
 )

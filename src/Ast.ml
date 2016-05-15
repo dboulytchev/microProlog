@@ -71,8 +71,8 @@ let vars atoms =
   let module S = Set.Make (String) in
   S.elements @@
   GT.foldl(GT.list) 
-    (GT.transform(atom)
-       (object inherit [S.t] @atom[foldl]
+    (GT.transform(body_item)
+       (object inherit [S.t] @body_item[foldl]
           method c_Functor s _ _ ts =
             GT.foldl(GT.list)
                (GT.transform(term)
