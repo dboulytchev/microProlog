@@ -199,7 +199,8 @@ target_alias = @target_alias@
 target_cpu = @target_cpu@
 target_os = @target_os@
 target_vendor = @target_vendor@
-TESTS = test001.sh test002.sh test003.sh test004.sh test005.sh test006.sh
+TESTS = test001.sh test002.sh test005.sh test006.sh
+#test002.sh test003.sh
 TESTS_ENVIRONMENT = $(srcdir)/test.sh
 
 # define macros that creates directiries

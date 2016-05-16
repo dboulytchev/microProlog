@@ -3,7 +3,7 @@ add (s(X), Y, s(Z)) :- add (X, Y, Z).
 add (o, X, X).
 
 -- Multiplication 
-mul (s(X), Y,  T) :- add (Y, Z, T), mul (X, Y, Z).
+mul (s(X), Y,  T) :- mul (X, Y, Z), add (Y, Z, T).
 mul (o, X, o).
 
 -- Equality

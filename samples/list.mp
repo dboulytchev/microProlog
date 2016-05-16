@@ -7,7 +7,7 @@ append (cons (H, T), L, cons (H, TL)) :- append (T, L, TL).
 append (nil, L, L).
 
 -- Inversion
-revert (cons (H, T), X) :- append (RT, cons (H, nil), X), revert (T, RT).
+revert (cons (H, T), X) :- revert (T, RT), append (RT, cons (H, nil), X).
 revert (nil, nil).
 
 -- Member 
