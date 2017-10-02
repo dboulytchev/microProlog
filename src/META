@@ -1,5 +1,0 @@
-version = ""
-description = ""
-requires = ""
-archive(byte) = "MicroProlog .cma"
-archive(native) = "MicroProlog .cmxa"

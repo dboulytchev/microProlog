@@ -42,13 +42,13 @@ module Lexer =
 
     let fromString p s =
       try
-        Ostap.Combinators.unwrap (p (new t s)) (fun x -> Checked.Ok x) 
+        Ostap.Combinators.unwrap (p (new t s)) (fun x -> `Ok x) 
           (fun (Some err) ->
              let [loc, m :: _] = err#retrieve (`First 1) (`Desc) in
              let m =  match m with `Msg m -> m | `Comment (s, _) -> Ostap.Msg.make s [||] loc in
-             Checked.Fail [m]
+             `Fail [m]
           )
-      with Error m -> Checked.Fail [m]
+      with Error m -> `Fail [m]
 
   end
 

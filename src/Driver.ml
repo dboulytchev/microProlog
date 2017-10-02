@@ -1,5 +1,4 @@
 open GT
-open Checked
 
 exception User_interrupt
 
@@ -18,8 +17,8 @@ let _ =
   | `Load f -> 
       let f = String.sub f 1 (String.length f - 2) in
       (match Parser.Lexer.fromString Parser.spec (Ostap.Util.read f) with
-       | Ok clauses  -> List.iter env#add clauses
-       | Fail (m::_) -> Printf.printf "Syntax error: %s\n" (Ostap.Msg.toString m)
+       | `Ok clauses  -> List.iter env#add clauses
+       | `Fail (m::_) -> Printf.printf "Syntax error: %s\n" (Ostap.Msg.toString m)
       )
   | `Unify (x, y) -> 
       Printf.printf "%s\n" 
@@ -50,8 +49,8 @@ let _ =
     try
       Printf.printf "> ";
       match Parser.Lexer.fromString Parser.main (read_line ()) with
-      | Ok command -> doCommand command
-      | Fail (m::_) ->   
+      | `Ok command -> doCommand command
+      | `Fail (m::_) ->   
          (match Ostap.Msg.loc m with
 	  | Ostap.Msg.Locator.Point (1, n) -> 
               Printf.printf "%s^\n" (String.make (n-1) ' ')
