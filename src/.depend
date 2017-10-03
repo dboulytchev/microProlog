@@ -4,8 +4,8 @@ Driver.cmo : Unify.cmo SLD.cmo Parser.cmo Env.cmo Ast.cmo
 Driver.cmx : Unify.cmx SLD.cmx Parser.cmx Env.cmx Ast.cmx
 Env.cmo : Ast.cmo
 Env.cmx : Ast.cmx
-Parser.cmo :
-Parser.cmx :
+Parser.cmo : Ast.cmo
+Parser.cmx : Ast.cmx
 SLD.cmo : Unify.cmo Ast.cmo
 SLD.cmx : Unify.cmx Ast.cmx
 Unify.cmo : Ast.cmo

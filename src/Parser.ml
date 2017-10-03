@@ -58,9 +58,22 @@ ostap (
   string    : !(Lexer.string);
   literal   : !(Lexer.literal);
   key[name] : @(name ^ "\\b" : name);
-  term      : x:var {`Var x} | f:ident a:(-"(" !(Ostap.Util.list term) -")")? {
-    `Functor (f, match a with Some a -> a | None -> [])
-  }
+  term      : 
+    x:var {`Var x} 
+  | f:ident a:(-"(" !(Ostap.Util.list term) -")")? {
+      `Functor (f, match a with Some a -> a | None -> [])
+    }
+  | "[" "]" {`Functor ("[]", [])}
+  | "[" es:!(Ostap.Util.list term) t:(-"|" t:var {`Var t})? "]" {
+      let t =
+      List.fold_right 
+        (fun e l -> `Functor ("::", [e; l])) 
+        es
+        (match t with None -> `Functor ("[]", []) | Some t -> t) 
+      in
+      Printf.printf "%s\n" (Ast.pretty_term t |> Ostap.Pretty.toString);
+      t
+    }
 )
 
 ostap (

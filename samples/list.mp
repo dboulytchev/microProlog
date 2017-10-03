@@ -1,18 +1,18 @@
 -- Length
-length (cons (H, T), s(L)) :- length (T, L).
-length (nil, o).
+length ([H | T], s(L)) :- length (T, L).
+length ([], o).
 
 -- Concatenation
-append (cons (H, T), L, cons (H, TL)) :- append (T, L, TL).
-append (nil, L, L).
+append ([H | T], L, [H | TL]) :- append (T, L, TL).
+append ([], L, L).
 
 -- Inversion
-revert (cons (H, T), X) :- revert (T, RT), append (RT, cons (H, nil), X).
-revert (nil, nil).
+reverse ([H | T], X) :- reverse (T, RT), append (RT, [H], X).
+reverse ([], []).
 
 -- Member 
-member (X, cons(Y, Z)) :- member (X, Z).
-member (X, cons(X, Y)).
+member (X, [Y | Z]) :- member (X, Z).
+member (X, [X |Y]).
 
 -- Sorting
 sort (cons (X, Y), T) :- sort (Y, Z), insert (X, Z, T).
