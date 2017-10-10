@@ -1,2 +1,2 @@
-> > > X = cons (move (t, c, b), cons (move (z, a, b), cons (move (t, a, c), cons (move (y, c, b), cons (move (t, b, a), cons (move (z, c, a), cons (move (t, c, b), cons (move (x, a, b), cons (move (t, a, c), cons (move (z, b, c), cons (move (t, b, a), cons (move (y, a, c), cons (move (t, c, b), cons (move (z, a, b), cons (move (t, a, c), nil)))))))))))))))
+> > > X = :: (move (t, c, b), :: (move (z, a, b), :: (move (t, a, c), :: (move (y, c, b), :: (move (t, b, a), :: (move (z, c, a), :: (move (t, c, b), :: (move (x, a, b), :: (move (t, a, c), :: (move (z, b, c), :: (move (t, b, a), :: (move (y, a, c), :: (move (t, c, b), :: (move (z, a, b), :: (move (t, a, c), [])))))))))))))))
 Continue (y/n)? > 

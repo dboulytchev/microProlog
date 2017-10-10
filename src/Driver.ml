@@ -43,7 +43,7 @@ let _ =
             Printf.printf "Continue (y/n)? ";
             let a = read_line () in
 	    if a = "y" || a = "Y" then iterate conf
-      in iterate (env#increment, [0, (goal :> Ast.body_item list), Unify.empty, env#clauses, []], [])
+      in iterate (env#increment, [0, SLD.extend goal, Unify.empty, env#clauses], [])
   in
   while true do
     try

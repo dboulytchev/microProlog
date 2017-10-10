@@ -1,28 +1,28 @@
 ../src/MicroProlog.opt <<EOF
 load "../samples/list.mp"
 load "../samples/peano.mp"
-? length (nil, X)
+? length ([], X)
 n
-? length (cons (s, nil), X)
+? length ([s], X)
 n
-? append (nil, cons (a, nil), X)
+? append ([], [a], X)
 n
-? append (cons (a, nil), nil, X)
+? append ([a], [], X)
 n
-? append (cons (a, cons (b, nil)), cons (c, cons (d, nil)), X)
+? append ([a, b], [c, d], X)
 n
-? revert (nil, X)
+? reverse ([], X)
 n
-? revert (cons (a, cons (b, cons (c, nil))), X)
+? reverse ([a, b, c], X)
 n
-? member (a, nil)
-? member (a, cons (a, nil))
+? member (a, [])
+? member (a, [a])
 n
-? member (a, cons (b, cons (a, nil)))
+? member (a, [b, a])
 n
-? sort (nil, X)
+? sort ([], X)
 n
-? sort (cons (s(s(s(o))), cons (s(s(o)), cons (s(o), cons (o, nil)))), X)
+? sort ([s(s(s(o))), s(s(o)), s(o), o], X)
 n
 quit
 EOF

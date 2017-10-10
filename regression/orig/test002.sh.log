@@ -1,13 +1,13 @@
 > > > X = o
 Continue (y/n)? > X = s (o)
-Continue (y/n)? > X = cons (a, nil)
-Continue (y/n)? > X = cons (a, nil)
-Continue (y/n)? > X = cons (a, cons (b, cons (c, cons (d, nil))))
-Continue (y/n)? > X = nil
-Continue (y/n)? > X = cons (c, cons (b, cons (a, nil)))
+Continue (y/n)? > X = :: (a, [])
+Continue (y/n)? > X = :: (a, [])
+Continue (y/n)? > X = :: (a, :: (b, :: (c, :: (d, []))))
+Continue (y/n)? > X = []
+Continue (y/n)? > X = :: (c, :: (b, :: (a, [])))
 Continue (y/n)? > No (more) answers.
 > yes
 Continue (y/n)? > yes
-Continue (y/n)? > X = nil
-Continue (y/n)? > X = cons (o, cons (s (o), cons (s (s (o)), cons (s (s (s (o))), nil))))
+Continue (y/n)? > X = []
+Continue (y/n)? > X = :: (o, :: (s (o), :: (s (s (o)), :: (s (s (s (o))), []))))
 Continue (y/n)? > 

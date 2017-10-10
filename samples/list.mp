@@ -15,10 +15,10 @@ member (X, [X | Y]).
 member (X, [Y | Z]) :- member (X, Z).
 
 -- Sorting
-sort (cons (X, Y), T) :- sort (Y, Z), insert (X, Z, T).
-sort (nil, nil).
+sort ([X | Y], T) :- sort (Y, Z), insert (X, Z, T).
+sort ([], []).
 
 -- Insertion into sorted
-insert (X, cons (Y, Z), cons (X, cons (Y, Z))) :- le (X, Y).
-insert (X, cons (Y, Z), cons (Y, T)) :- le (Y, X), insert (X, Z, T).
-insert (X, nil, cons (X, nil)).
+insert (X, [Y | Z], [X, Y | Z]) :- le (X, Y).
+insert (X, [Y | Z], [Y | T]) :- le (Y, X), insert (X, Z, T).
+insert (X, [], [X]).
