@@ -11,8 +11,8 @@ reverse ([H | T], X) :- reverse (T, RT), append (RT, [H], X).
 reverse ([], []).
 
 -- Member 
+member (X, [X | Y]).
 member (X, [Y | Z]) :- member (X, Z).
-member (X, [X |Y]).
 
 -- Sorting
 sort (cons (X, Y), T) :- sort (Y, Z), insert (X, Z, T).

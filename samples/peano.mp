@@ -28,3 +28,6 @@ lt (X, Y) :- sub(Y, X, Z), ge (Z, s(o)).
 -- Factorial 
 fact (s(X), Fsx) :- fact (X, Fx), mul (s(X), Fx, Fsx).
 fact (o, s(o)).
+
+-- Dividers
+divider (X, Y) :- le (X, Y), mul (X, Z, Y).
