@@ -4,7 +4,7 @@ OCAMLDEP = ocamldep
 SOURCES = Ast.ml Parser.ml Unify.ml Env.ml SLD.ml Driver.ml
 CAMLP5 = -pp "camlp5o -I `ocamlfind -query ostap.syntax` -I `ocamlfind -query GT.syntax` pa_ostap.cmo pa_gt.cmo -L `ocamlfind -query GT.syntax`"
 PXFLAGS = $(CAMLP5)
-BFLAGS = -rectypes -I `ocamlfind -query ostap` -I `ocamlfind -query GT` -I `ocamlfind -query re` -I `ocamlfind -query checked`
+BFLAGS = -rectypes -I `ocamlfind -query ostap` -I `ocamlfind -query GT` -I `ocamlfind -query re` -I `ocamlfind -query re.emacs` -I `ocamlfind -query re.str`
 OFLAGS = $(BFLAGS)
 
 all: .depend MicroProlog.opt MicroProlog.byte
