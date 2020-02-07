@@ -11,25 +11,25 @@
 
 @type clause = [ `Clause of atom * body ] with gmap, foldl, show
 
-class pretty_term =
-  object inherit [unit, Ostap.Pretty.printer] @term
+let to_term : atom -> term = fun a -> (a :> term)
+
+class pretty_term self =
+  object inherit [unit, term, Ostap.Pretty.printer] @term 
     method c_Var _ _ s = Ostap.Pretty.string s
-    method c_Functor _ s f ts = 
+    method c_Functor s _ f ts = 
       Ostap.Pretty.listBySpace [
         Ostap.Pretty.string f;
         match ts with
         | [] -> Ostap.Pretty.empty
-        | ys -> Ostap.Pretty.rboxed (Ostap.Pretty.listByComma (List.map (s.GT.f ()) ts))
+        | ys -> Ostap.Pretty.rboxed (Ostap.Pretty.listByComma (List.map (self s) ts))
       ]        
   end
 
 let pretty_term t = GT.transform(term) (new pretty_term) () t
-
-let to_term : atom -> term = fun a -> (a :> term)
-
-class pretty_atom =
-  object inherit [unit, Ostap.Pretty.printer] @atom
-    method c_Functor _ s f ts = 
+                  
+class ['a] pretty_atom =
+  object inherit [unit, 'a, Ostap.Pretty.printer] @atom 
+    method c_Functor s _ f ts = 
       Ostap.Pretty.listBySpace [
         Ostap.Pretty.string f;
         match ts with
@@ -38,25 +38,25 @@ class pretty_atom =
       ]        
   end
 
-let pretty_atom a = GT.transform(atom) (new pretty_atom) () a
+let pretty_atom a = GT.transform(atom) (GT.lift @@ new pretty_atom) () a
 
 class pretty_body_item =
-  object inherit [unit, Ostap.Pretty.printer] @body_item
-         inherit pretty_atom
+  object inherit [unit, body_item, Ostap.Pretty.printer] @body_item
+         inherit [body_item] pretty_atom 
     method c_Cut _ _ = Ostap.Pretty.string "!"
   end
 
-let pretty_body_item i = GT.transform(body_item) (new pretty_body_item) () i
+let pretty_body_item i = GT.transform(body_item) (GT.lift @@ new pretty_body_item) () i
 
 class pretty_body =
-  object inherit [unit, Ostap.Pretty.printer] @body
+  object inherit [unit, body, Ostap.Pretty.printer] @body
     method c_Body _ _ bs = Ostap.Pretty.listByComma (List.map pretty_body_item bs)
   end
 
-let pretty_body b = GT.transform(body) (new pretty_body) () b
+let pretty_body b = GT.transform(body) (GT.lift @@ new pretty_body) () b
 
 class pretty_clause =
-  object inherit [unit, Ostap.Pretty.printer] @clause
+  object inherit [unit, clause, Ostap.Pretty.printer] @clause
     method c_Clause _ _ a ((`Body bs) as b) = 
       (fun a ->
          match bs with
@@ -65,20 +65,20 @@ class pretty_clause =
       ) (pretty_atom a)
   end
 
-let pretty_clause c = GT.transform(clause) (new pretty_clause) () c
+let pretty_clause c = GT.transform(clause) (GT.lift @@ new pretty_clause) () c
 
 let vars atoms =
   let module S = Set.Make (String) in
   S.elements @@
   GT.foldl(GT.list) 
     (GT.transform(body_item)
-       (object inherit [S.t] @body_item[foldl]
+       (fun self -> object inherit [S.t, _] @body_item[foldl] self
           method c_Functor s _ _ ts =
             GT.foldl(GT.list)
-               (GT.transform(term)
-		  (object inherit [S.t] @term[foldl]
+               (GT.transform(term) (fun self ->
+		  (object inherit [S.t, _] @term[foldl] self
                      method c_Var s _ x = S.add x s
-		   end)
+		   end))
 	       )
                s
 	       ts

@@ -26,9 +26,9 @@ let rec walk : subst -> Ast.term -> Ast.term = fun s x ->
 
 let walk' : subst -> Ast.term -> Ast.term = fun s x -> 
  GT.transform(Ast.term) 
-    (object inherit [Ast.term] @Ast.term[gmap]
+    (fun self -> object inherit [Ast.term, _] @Ast.term[gmap] self
        method c_Var _ v x = 
-         try v.GT.f () (M.find x s) with Not_found -> `Var x
+         try self () (M.find x s) with Not_found -> `Var x
      end) 
     () 
     x
@@ -37,11 +37,11 @@ let occurs : subst -> string -> Ast.term -> bool = fun s x t ->
   try 
     ignore (
       GT.transform(Ast.term) 
-         (object inherit [Ast.term] @Ast.term[gmap]
+         (fun self -> object inherit [Ast.term, _] @Ast.term[gmap] self
             method c_Var _ v y = 
               if y = x 
 	      then raise Not_found
-	      else v.GT.x
+	      else v
           end)
          ()
          (walk s t)

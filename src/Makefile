@@ -1,10 +1,12 @@
-OCAMLC = ocamlc
-OCAMLOPT = ocamlopt
-OCAMLDEP = ocamldep
-SOURCES = Ast.ml Parser.ml Unify.ml Env.ml SLD.ml Driver.ml
-CAMLP5 = -pp "camlp5o -I `ocamlfind -query ostap.syntax` -I `ocamlfind -query GT.syntax` pa_ostap.cmo pa_gt.cmo -L `ocamlfind -query GT.syntax`"
+OCAMLC = ocamlfind c
+OCAMLOPT = ocamlfind opt
+OCAMLDEP = ocamlfind dep
+SOURCES = Ast.ml PParser.ml Unify.ml PEnv.ml SLD.ml Driver.ml
+CAMLP5 = -syntax camlp5o -package ostap.syntax -package GT.syntax.all
+#-pp "camlp5o -I `ocamlfind -query ostap.syntax` -I `ocamlfind -query GT.syntax` pa_ostap.cmo pa_gt.cmo -L `ocamlfind -query GT.syntax`"
 PXFLAGS = $(CAMLP5)
-BFLAGS = -rectypes -I `ocamlfind -query ostap` -I `ocamlfind -query GT` -I `ocamlfind -query re` -I `ocamlfind -query re.emacs` -I `ocamlfind -query re.str`
+BFLAGS = -rectypes -package GT -package ostap -linkpkg
+#-I `ocamlfind -query ostap` -I `ocamlfind -query GT` -I `ocamlfind -query re` -I `ocamlfind -query re.emacs` -I `ocamlfind -query re.str`
 OFLAGS = $(BFLAGS)
 
 all: .depend MicroProlog.opt MicroProlog.byte
@@ -14,10 +16,10 @@ all: .depend MicroProlog.opt MicroProlog.byte
 	$(OCAMLDEP) $(PXFLAGS) *.ml > .depend
 
 MicroProlog.opt: $(SOURCES:.ml=.cmx)
-	$(OCAMLOPT) -o MicroProlog.opt $(OFLAGS) GT.cmxa re.cmxa re_emacs.cmxa re_str.cmxa ostap.cmx $(SOURCES:.ml=.cmx)
+	$(OCAMLOPT) -o MicroProlog.opt $(OFLAGS) $(SOURCES:.ml=.cmx)
 
 MicroProlog.byte: $(SOURCES:.ml=.cmo)
-	$(OCAMLC) -o MicroProlog.byte $(BFLAGS) GT.cma re.cma re_emacs.cma re_str.cma ostap.cmo $(SOURCES:.ml=.cmo)
+	$(OCAMLC) -o MicroProlog.byte $(BFLAGS) $(SOURCES:.ml=.cmo)
 
 clean:
 	rm -Rf *.cmi *.cmo *.cmx *.annot *.o

@@ -37,13 +37,13 @@ let rec solve env (bound, stack, pruned) =
         let m = ref M.empty in
         let rename a =
           GT.transform(Ast.atom)              
-            (object inherit [Ast.atom] @Ast.atom[gmap]
+            (fun self -> object inherit [Ast.atom, _] @Ast.atom[gmap] self
                method c_Functor _ _ f ts =
                  `Functor (
                     f,
                     GT.gmap(GT.list)
                        (GT.transform(Ast.term)
-                           (object inherit [Ast.term] @Ast.term[gmap]        
+                           (fun self -> object inherit [Ast.term, _] @Ast.term[gmap] self
                               method c_Var _ _ x = 
                                 try `Var (M.find x !m)
                                 with Not_found ->

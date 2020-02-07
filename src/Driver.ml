@@ -1,10 +1,29 @@
 open GT
-
+open Ostap
+   
 exception User_interrupt
+exception Error of Ostap.Msg.t
+
+let parse p s =
+  Util.parse
+    (object
+       inherit Matcher.t s
+       inherit Util.Lexers.decimal s
+       inherit Util.Lexers.string s             
+       inherit Util.Lexers.lident PParser.Lexer.keywords s
+       inherit Util.Lexers.uident PParser.Lexer.keywords s
+       inherit Util.Lexers.skip [
+	 Matcher.Skip.whitespaces " \t\n\r";
+	 Matcher.Skip.lineComment "--";
+	 Matcher.Skip.nestedComment "(*" "*)"
+       ] s
+     end
+    )
+    (ostap (p -EOF))
 
 let _ = 
   Sys.signal Sys.sigint (Sys.Signal_handle (fun _ -> raise User_interrupt));
-  let env = new Env.c in
+  let env = new PEnv.c in
   let doCommand = function
   | `TraceOn     -> env#trace_on
   | `TraceOff    -> env#trace_off
@@ -15,10 +34,9 @@ let _ =
   | `Clause c    -> env#add c
   | `Show        -> env#show
   | `Load f -> 
-      let f = String.sub f 1 (String.length f - 2) in
-      (match Parser.Lexer.fromString Parser.spec (Ostap.Util.read f) with
+      (match parse PParser.spec (Util.read f) with
        | `Ok clauses  -> List.iter env#add clauses
-       | `Fail (m::_) -> Printf.printf "Syntax error: %s\n" (Ostap.Msg.toString m)
+       | `Fail m -> Printf.printf "Syntax error: %s\n" m
       )
   | `Unify (x, y) -> 
       Printf.printf "%s\n" 
@@ -46,19 +64,13 @@ let _ =
       in iterate (env#increment, [0, SLD.extend goal, Unify.empty, env#clauses], [])
   in
   while true do
-    try
+    (*try*)
       Printf.printf "> ";
-      match Parser.Lexer.fromString Parser.main (read_line ()) with
+      match parse PParser.main (read_line ()) with
       | `Ok command -> doCommand command
-      | `Fail (m::_) ->   
-         (match Ostap.Msg.loc m with
-	  | Ostap.Msg.Locator.Point (1, n) -> 
-              Printf.printf "%s^\n" (String.make (n-1) ' ')
-	  | _ -> ()
-	 );
-	 Printf.printf "Syntax error: %s\n" (Ostap.Msg.toString m)
-    with
+      | `Fail m     -> Printf.printf "Syntax error: %s\n" m
+    (*with
     | User_interrupt -> Printf.printf "Interrupted\n"
-    | exc -> Printf.printf "%s\n" (Printexc.to_string exc)
+    | exc -> Printf.printf "%s\n" (Printexc.to_string exc)*)
   done
 
