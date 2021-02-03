@@ -64,13 +64,13 @@ let _ =
       in iterate (env#increment, [0, SLD.extend goal, Unify.empty, env#clauses], [])
   in
   while true do
-    (*try*)
+    try
       Printf.printf "> ";
       match parse PParser.main (read_line ()) with
       | `Ok command -> doCommand command
       | `Fail m     -> Printf.printf "Syntax error: %s\n" m
-    (*with
+    with
     | User_interrupt -> Printf.printf "Interrupted\n"
-    | exc -> Printf.printf "%s\n" (Printexc.to_string exc)*)
+    | exc -> Printf.printf "%s\n" (Printexc.to_string exc)
   done
 
