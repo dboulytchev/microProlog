@@ -1,12 +1,30 @@
 Ast.cmo :
 Ast.cmx :
-Driver.cmo : Unify.cmo SLD.cmo PParser.cmo PEnv.cmo Ast.cmo
-Driver.cmx : Unify.cmx SLD.cmx PParser.cmx PEnv.cmx Ast.cmx
-PEnv.cmo : Ast.cmo
-PEnv.cmx : Ast.cmx
+Driver.cmo : \
+    Unify.cmo \
+    SLD.cmo \
+    PParser.cmo \
+    PEnv.cmo \
+    Ast.cmo
+Driver.cmx : \
+    Unify.cmx \
+    SLD.cmx \
+    PParser.cmx \
+    PEnv.cmx \
+    Ast.cmx
+PEnv.cmo : \
+    Ast.cmo
+PEnv.cmx : \
+    Ast.cmx
 PParser.cmo :
 PParser.cmx :
-SLD.cmo : Unify.cmo Ast.cmo
-SLD.cmx : Unify.cmx Ast.cmx
-Unify.cmo : Ast.cmo
-Unify.cmx : Ast.cmx
+SLD.cmo : \
+    Unify.cmo \
+    Ast.cmo
+SLD.cmx : \
+    Unify.cmx \
+    Ast.cmx
+Unify.cmo : \
+    Ast.cmo
+Unify.cmx : \
+    Ast.cmx

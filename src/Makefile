@@ -2,7 +2,7 @@ OCAMLC = ocamlfind c
 OCAMLOPT = ocamlfind opt
 OCAMLDEP = ocamlfind dep
 SOURCES = Ast.ml PParser.ml Unify.ml PEnv.ml SLD.ml Driver.ml
-CAMLP5 = -syntax camlp5o -package ostap.syntax -package GT.syntax.all
+CAMLP5 = -syntax camlp5o -package ostap.syntax -package GT.syntax,GT.syntax.all
 #-pp "camlp5o -I `ocamlfind -query ostap.syntax` -I `ocamlfind -query GT.syntax` pa_ostap.cmo pa_gt.cmo -L `ocamlfind -query GT.syntax`"
 PXFLAGS = $(CAMLP5)
 BFLAGS = -rectypes -package GT -package ostap -linkpkg

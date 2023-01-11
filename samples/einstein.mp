@@ -19,7 +19,7 @@ solve(Who) :-
    street(S),
 
    -- The Englishman lives in the red house.
-   member(house(A, english, red, _  , _  , _), S),
+   member(house(_, english, red, _  , _  , _), S),
 
    --The Swede keeps dogs.
    member(house(B, swede  , _  , dog, _  , _), S),
@@ -47,7 +47,6 @@ solve(Who) :-
 
    --The German smokes Prince.
    member(house(H, german, _, _, _, prince), S),
-
    
    --The man who keeps horses lives next to the Dunhill smoker.
    member(house(I, _, _, horse, _, _), S),
