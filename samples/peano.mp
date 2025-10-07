@@ -1,18 +1,27 @@
 -- Addition 
-add (s(X), Y, s(Z)) :- add (X, Y, Z).
 add (o, X, X).
+add (s(X), Y, s(Z)) :- add (X, Y, Z).
 
--- Multiplication 
+-- Multiplication
+mul (o, X, o).  
 mul (s(X), Y,  T) :- mul (X, Y, Z), add (Y, Z, T).
-mul (o, X, o).
 
+-- Common divisor
+cd   (X, Y, Z) :- le (A, X), le (B, Y), le (Z, X), le (Z, Y), mul (Z, A, X), mul (Z, B, Y).
+nld  (Z, X, Y) :- cd (X, Y, Z), cd (X, Y, Z1), lt (Z1, Z).
+  
+nlcd (X, Y, Z) :- cd (X, Y, Z), nld (Z, X, Y).
+
+--
+nmp (X, Y) :- nlcd (X, Y, _).
+  
 -- Equality
-eq (s(X), s(Y)) :- eq (X, Y).
 eq (o, o).
+eq (s(X), s(Y)) :- eq (X, Y).
 
 -- Less-or-equal 
-le (X, s(Y)) :- le (X, Y).
 le (X, X).
+le (X, s(Y)) :- le (X, Y).
 
 -- Greater-or-equal
 ge (X, Y) :- le (Y, X).
