@@ -31,11 +31,11 @@ let _ =
   | `Empty       -> ()
   | `Quit        -> exit 0
   | `Clear       -> env#clear
-  | `Clause c    -> env#add c
+  | `Clause c    -> env#add c 
   | `Show        -> env#show
   | `Load f -> 
       (match parse PParser.spec (Util.read f) with
-       | `Ok clauses  -> List.iter env#add clauses
+       | `Ok clauses  -> List.iter env#add clauses 
        | `Fail m -> Printf.printf "Syntax error: %s\n" m
       )
   | `Unify (x, y) -> 

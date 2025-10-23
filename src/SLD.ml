@@ -1,15 +1,20 @@
-type item  = [ Ast.atom | `Cut of stack ]
+type item  = [ Ast.atom | `Cut of stack ] 
 and  goal  = item list
 and  state = int * goal * Unify.subst * Ast.clause list
 and  stack = state list
 
 let extend is =  
   List.map (function
-            | `Cut -> `Cut []
+            | `Cut -> `Cut [] 
             | #Ast.atom as a -> (a :> item)        
            ) is
  
-let pretty_goal goal = Ostap.Pretty.listByComma @@ GT.gmap(GT.list) Ast.pretty_body_item goal
+let pretty_goal goal =
+  Ostap.Pretty.listByComma @@
+  GT.gmap(GT.list) (function
+                      `Cut _ -> Ostap.Pretty.string "!"
+                    | #Ast.atom as a -> Ast.pretty_atom a
+                   ) goal
 
 let pretty_state (depth, goal, subst, clauses) =
   Ostap.Pretty.seq [
@@ -23,7 +28,7 @@ let pretty_state (depth, goal, subst, clauses) =
 let pretty_stack stack = Ostap.Pretty.seq @@
   GT.gmap(GT.list) (fun s -> Ostap.Pretty.seq [pretty_state s; Ostap.Pretty.newline]) stack
 
-let rec solve env (bound, stack, pruned) = 
+let rec solve env (bound, (stack:stack), pruned) = 
   let rec find (a : Ast.atom) (s : Unify.subst) clauses cut = 
     let name = 
       let i = env#index in
@@ -64,7 +69,7 @@ let rec solve env (bound, stack, pruned) =
         let bs = 
           List.map (
             function
-            | `Cut -> `Cut cut
+            | `Cut -> `Cut cut 
             | #Ast.atom as a -> (rename a :> item)
           ) bs 
         in
@@ -74,11 +79,10 @@ let rec solve env (bound, stack, pruned) =
     in
     inner clauses
   in
-(*  env#trace "Stack:";
-  env#trace (Ostap.Pretty.toString (pretty_stack stack));
+  env#trace "Stack:";
+  env#trace (Ostap.Pretty.toString (pretty_stack stack)); 
   env#wait;
-*)
-  match stack with
+  match (stack : stack) with
   | [] -> (match pruned with [] -> `End | _ -> solve env (bound + env#increment, pruned, []))
   | (depth, goal, subst, clauses)::stack when depth < bound ->
       (match goal with
@@ -87,7 +91,7 @@ let rec solve env (bound, stack, pruned) =
           (match a with
            | `Cut cut -> solve env (bound, (depth, atoms, subst, clauses)::cut, pruned)
            | #Ast.atom as a ->
-              (match find a subst clauses stack with
+             (match find a subst clauses (stack : stack) with
               | None -> solve env (bound, stack, pruned)
               | Some (subst', btoms, clauses') ->
                   solve env @@ (

@@ -1,7 +1,8 @@
 @type term = [
-  | `Var     of GT.string 
-  | `Functor of GT.string * term GT.list
-] with gmap, foldl, show
+| `Var     of GT.string 
+| `Functor of GT.string * term GT.list
+]               
+with gmap, foldl, show
 
 @type atom = [ `Functor of GT.string * term GT.list ] with gmap, foldl, show
 
@@ -43,7 +44,7 @@ let pretty_atom a = GT.transform(atom) (GT.lift @@ new pretty_atom) () a
 class pretty_body_item =
   object inherit [unit, body_item, Ostap.Pretty.printer] @body_item
          inherit [body_item] pretty_atom 
-    method c_Cut _ _ = Ostap.Pretty.string "!"
+    method c_Cut _ _ = Ostap.Pretty.string "!" 
   end
 
 let pretty_body_item i = GT.transform(body_item) (GT.lift @@ new pretty_body_item) () i
