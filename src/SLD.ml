@@ -28,7 +28,7 @@ let pretty_state (depth, goal, subst, clauses) =
 let pretty_stack stack = Ostap.Pretty.seq @@
   GT.gmap(GT.list) (fun s -> Ostap.Pretty.seq [pretty_state s; Ostap.Pretty.newline]) stack
 
-let rec solve env (bound, (stack:stack), pruned) = 
+let rec solve env (stack, pruned) = 
   let rec find (a : Ast.atom) (s : Unify.subst) clauses cut = 
     let name = 
       let i = env#index in
@@ -82,25 +82,24 @@ let rec solve env (bound, (stack:stack), pruned) =
   env#trace "Stack:";
   env#trace (Ostap.Pretty.toString (pretty_stack stack)); 
   env#wait;
-  match (stack : stack) with
-  | [] -> (match pruned with [] -> `End | _ -> solve env (bound + env#increment, pruned, []))
-  | (depth, goal, subst, clauses)::stack when depth < bound ->
+  match stack with
+  | [] -> (match pruned with [] -> `End | _ -> solve env (pruned, []))
+  | (depth, goal, subst, clauses)::stack when env#check_depth depth ->
       (match goal with
-       | [] -> `Answer (subst, (bound, stack, pruned))
+       | [] -> `Answer (subst, (stack, pruned))
        | a::atoms ->
           (match a with
-           | `Cut cut -> solve env (bound, (depth, atoms, subst, clauses)::cut, pruned)
+           | `Cut cut -> solve env ((depth, atoms, subst, clauses)::cut, pruned)
            | #Ast.atom as a ->
-             (match find a subst clauses (stack : stack) with
-              | None -> solve env (bound, stack, pruned)
+             (match find a subst clauses stack with
+              | None -> solve env (stack, pruned)
               | Some (subst', btoms, clauses') ->
                   solve env @@ (
-                     bound,
                      (depth+1, btoms @ atoms, subst', env#clauses)::(depth, goal, subst, clauses')::stack,
                      pruned
                   )
               )
           )
       )
-  | state::stack -> solve env (bound, stack, state::pruned)
+  | state::stack -> solve env#increment (stack, state::pruned)
 

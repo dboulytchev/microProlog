@@ -25,13 +25,16 @@ let _ =
   Printf.printf "MicroProlog. (C) Dmitry Boulytchev, SPbSU, 2016-2025.\n";
   Printf.printf "Type \"help\" to see the other commands.\n";
   Printf.printf "Hit \"Ctrl-C\" to break infinite search.\n";
-  Sys.signal Sys.sigint (Sys.Signal_handle (fun _ -> raise User_interrupt));
+  ignore @@ Sys.signal Sys.sigint (Sys.Signal_handle (fun _ -> raise User_interrupt));
   let env = new PEnv.c in
   let doCommand = function
   | `TraceOn     -> env#trace_on
   | `TraceOff    -> env#trace_off
-  | `Increment n -> env#set_increment n
-  | `Empty       -> ()
+  | `Factor n    -> env#set_factor n
+  | `Depth n     -> env#set_depth n
+  | `DepthOff    -> env#unset_depth
+  | `DepthShow   -> Printf.printf "%s\n" env#show_depth
+  | `Empty       -> () 
   | `Quit        -> exit 0
   | `Clear       -> env#clear
   | `Clause c    -> env#add c 
@@ -39,8 +42,8 @@ let _ =
   | `Help        -> Printf.printf "%s" PParser.help
   | `Load f -> 
       (match parse PParser.spec (Util.read f) with
-       | `Ok clauses  -> List.iter env#add clauses 
-       | `Fail m -> Printf.printf "Syntax error: %s\n" m
+       | `Ok clauses -> List.iter env#add clauses 
+       | `Fail m     -> Printf.printf "Syntax error: %s\n" m
       )
   | `Unify (x, y) -> 
       Printf.printf "%s\n" 
@@ -65,7 +68,7 @@ let _ =
             Printf.printf "Continue (y/n)? ";
             let a = read_line () in
 	    if a = "y" || a = "Y" then iterate conf
-      in iterate (env#increment, [-1(*0*), SLD.extend goal, Unify.empty, env#clauses], [])
+      in iterate ([0, SLD.extend goal, Unify.empty, env#clauses], [])
   in
   while true do
     try

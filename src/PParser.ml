@@ -3,7 +3,7 @@ open Ostap
 module Lexer =
   struct
 
-    let keywords = ["quit"; "clear"; "show"; "unify"; "help"; "load"; "trace"; "on"; "off"; "increment"]
+    let keywords = ["quit"; "clear"; "show"; "unify"; "help"; "load"; "trace"; "on"; "off"; "depth"; "factor"]
 
     let r = Ostap.Matcher.Token.repr
 
@@ -63,16 +63,21 @@ body     : l:!(Ostap.Util.list (ostap(atom (*| "!" {`Cut}*) ))) {`Body l};
 
 let help =
   "Commands:\n" ^
-  "   help  --- print this help\n" ^
-  "   quit  --- quit the interpreter\n" ^
-  "   clear --- remove all definitions\n" ^
-  "   show  --- show current definitions\n" ^
+  "   help                --- print this help\n" ^
+  "   quit                --- quit the interpreter\n" ^
+  "   clear               --- remove all definitions\n" ^
+  "   show                --- show current definitions\n" ^
   "   unify <term> <term> --- unify given terms\n" ^
-  "   load  <string> --- load definitions from file\n" ^
-  "   trace [on | off] --- enable/disable tracing\n" ^
-(*  "   increment <integer> --- ??\n" ^ *)
-  "   <clause> --- add a clause to current definitions\n" ^
-  "   ? <query> --- run a query\n"
+  "   load  <string>      --- load definitions from file\n" ^
+  "   trace [on | off]    --- enable/disable tracing\n" ^
+  "   depth <positive>    --- enable iterative deepening with given\n" ^
+  "                           initial depth\n" ^
+  "   factor <positive>   --- set multiplicative factor for iterative\n" ^
+  "                           deepening (default 2)\n" ^
+  "   depth off           --- disable iterative deepening\n" ^                           
+  "   depth               --- show current iterative deepening settings\n" ^
+  "   <clause>            --- add a clause to current definitions\n" ^
+  "   ? <query>           --- run a query\n"
 ostap (
   main: i:item? EOF {match i with Some i -> i | _ -> `Empty};
   item:
@@ -84,7 +89,10 @@ ostap (
   | key["load"]  s:string          {`Load s}
   | key["trace"] key["on"]         {`TraceOn}
   | key["trace"] key["off"]        {`TraceOff}
-  | key["increment"] n:literal     {`Increment n}
+  | key["factor"] n:literal        {`Factor n}
+  | key["depth"] n:literal         {`Depth n}
+  | key["depth"] key["off"]        {`DepthOff}
+  | key["depth"]                   {`DepthShow}
   | c:clause                       {`Clause c}
   | "?" b:body                     {`Query b};
   spec: clause+ -EOF

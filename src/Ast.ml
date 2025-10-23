@@ -61,8 +61,11 @@ class pretty_clause =
     method c_Clause _ _ a ((`Body bs) as b) = 
       (fun a ->
          match bs with
-         | [] -> a
-         | _  -> Ostap.Pretty.listBySpace [a; Ostap.Pretty.string ":-"; pretty_body b]
+         | [] -> Ostap.Pretty.seq [a; Ostap.Pretty.string "."]
+         | _  -> Ostap.Pretty.seq [
+                   Ostap.Pretty.listBySpace [a; Ostap.Pretty.string ":-"; pretty_body b]; 
+                   Ostap.Pretty.string "."
+                 ]
       ) (pretty_atom a)
   end
 
