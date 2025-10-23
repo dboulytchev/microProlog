@@ -28,7 +28,8 @@ let pretty_state (depth, goal, subst, clauses) =
 let pretty_stack stack = Ostap.Pretty.seq @@
   GT.gmap(GT.list) (fun s -> Ostap.Pretty.seq [pretty_state s; Ostap.Pretty.newline]) stack
 
-let rec solve env (stack, pruned) = 
+let rec solve env (stack, pruned) =
+  let decorate_cut stack atoms = List.map (function `Cut _ -> `Cut stack | a -> a) atoms in 			
   let rec find (a : Ast.atom) (s : Unify.subst) clauses cut = 
     let name = 
       let i = env#index in
@@ -89,13 +90,14 @@ let rec solve env (stack, pruned) =
        | [] -> `Answer (subst, (stack, pruned))
        | a::atoms ->
           (match a with
-           | `Cut cut -> solve env ((depth, atoms, subst, clauses)::cut, pruned)
+           | `Cut cut -> solve env ((depth, atoms, subst, clauses) :: cut, pruned)
            | #Ast.atom as a ->
              (match find a subst clauses stack with
               | None -> solve env (stack, pruned)
               | Some (subst', btoms, clauses') ->
+                  let stack' = (depth, goal, subst, clauses')::stack in
                   solve env @@ (
-                     (depth+1, btoms @ atoms, subst', env#clauses)::(depth, goal, subst, clauses')::stack,
+                     (depth+1, (decorate_cut stack (* ' *) btoms) @ atoms, subst', env#clauses)::stack',
                      pruned
                   )
               )
