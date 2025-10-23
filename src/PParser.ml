@@ -61,10 +61,23 @@ body     : l:!(Ostap.Util.list (ostap(atom (*| "!" {`Cut}*) ))) {`Body l};
   }   
 )
 
+let help =
+  "Commands:\n" ^
+  "   help  --- print this help\n" ^
+  "   quit  --- quit the interpreter\n" ^
+  "   clear --- remove all definitions\n" ^
+  "   show  --- show current definitions\n" ^
+  "   unify <term> <term> --- unify given terms\n" ^
+  "   load  <string> --- load definitions from file\n" ^
+  "   trace [on | off] --- enable/disable tracing\n" ^
+(*  "   increment <integer> --- ??\n" ^ *)
+  "   <clause> --- add a clause to current definitions\n" ^
+  "   ? <query> --- run a query\n"
 ostap (
   main: i:item? EOF {match i with Some i -> i | _ -> `Empty};
   item:
     key["quit"]                    {`Quit}
+  | key["help"]                    {`Help}
   | key["clear"]                   {`Clear}
   | key["show"]                    {`Show}
   | key["unify"] x:term y:term     {`Unify x y}
@@ -73,6 +86,6 @@ ostap (
   | key["trace"] key["off"]        {`TraceOff}
   | key["increment"] n:literal     {`Increment n}
   | c:clause                       {`Clause c}
-  | "?" (*a:!(Ostap.Util.list atom) *) b:body {`Query b};
+  | "?" b:body                     {`Query b};
   spec: clause+ -EOF
 )

@@ -21,7 +21,10 @@ let parse p s =
     )
     (ostap (p -EOF))
 
-let _ = 
+let _ =
+  Printf.printf "MicroProlog. (C) Dmitry Boulytchev, SPbSU, 2016-2025.\n";
+  Printf.printf "Type \"help\" to see the other commands.\n";
+  Printf.printf "Hit \"Ctrl-C\" to break infinite search.\n";
   Sys.signal Sys.sigint (Sys.Signal_handle (fun _ -> raise User_interrupt));
   let env = new PEnv.c in
   let doCommand = function
@@ -33,6 +36,7 @@ let _ =
   | `Clear       -> env#clear
   | `Clause c    -> env#add c 
   | `Show        -> env#show
+  | `Help        -> Printf.printf "%s" PParser.help
   | `Load f -> 
       (match parse PParser.spec (Util.read f) with
        | `Ok clauses  -> List.iter env#add clauses 
