@@ -40,7 +40,7 @@ ostap (
       `Functor (f, match a with Some a -> a | None -> [])
     }
   | "[" "]" {`Functor ("[]", [])}
-  | "[" es:!(Ostap.Util.list term) t:(-"|" t:var {`Var t})? "]" {
+  | "[" es:!(Ostap.Util.list term) t:(-"|" term)? "]" {
       List.fold_right 
         (fun e l -> `Functor ("::", [e; l])) 
         es
