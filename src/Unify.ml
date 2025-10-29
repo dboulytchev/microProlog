@@ -2,7 +2,13 @@ module M = Map.Make (String)
 
 type subst = Ast.term M.t
 
+let is_empty = M.is_empty
 let empty = M.empty
+
+let subst_to_diseq s =
+  let l, r = List.split @@ M.bindings s   in
+  let l    = List.map (fun x -> `Var x) l in
+  (`Functor ("(", l), `Functor ("(", r))
 
 let pretty_subst = function
 | None   -> Ostap.Pretty.string "fail"

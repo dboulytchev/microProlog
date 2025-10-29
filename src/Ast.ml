@@ -4,16 +4,18 @@
 ]               
 with gmap, foldl, show
 
-@type atom = [ `Functor of GT.string * term GT.list ] with gmap, foldl, show
+@type atom = [
+| `Functor of GT.string * term GT.list
+] with gmap, foldl, show
 
-@type body_item = [ atom | `Cut ] with gmap, foldl, show
+@type body_item = [ atom | `Cut | `Diseq of term * term ] with gmap, foldl, show
 
 @type body = [ `Body of body_item GT.list ] with gmap, foldl, show
 
 @type clause = [ `Clause of atom * body ] with gmap, foldl, show
 
 let to_term : atom -> term = fun a -> (a :> term)
-
+ 
 class pretty_term self =
   object inherit [unit, term, Ostap.Pretty.printer] @term 
     method c_Var _ _ s = Ostap.Pretty.string s
@@ -29,7 +31,7 @@ class pretty_term self =
 let pretty_term t = GT.transform(term) (new pretty_term) () t
                   
 class ['a] pretty_atom =
-  object inherit [unit, 'a, Ostap.Pretty.printer] @atom 
+  object inherit [unit, 'a, Ostap.Pretty.printer] @atom
     method c_Functor s _ f ts = 
       Ostap.Pretty.listBySpace [
         Ostap.Pretty.string f;
@@ -43,7 +45,13 @@ let pretty_atom a = GT.transform(atom) (GT.lift @@ new pretty_atom) () a
 
 class pretty_body_item =
   object inherit [unit, body_item, Ostap.Pretty.printer] @body_item
-         inherit [body_item] pretty_atom 
+         inherit [body_item] pretty_atom
+    method c_Diseq   s _ t1 t2 =
+      Ostap.Pretty.listBySpace [
+          pretty_term t1;
+          Ostap.Pretty.string "/=";
+          pretty_term t2;
+      ]
     method c_Cut _ _ = Ostap.Pretty.string "!" 
   end
 

@@ -4,8 +4,13 @@ add (s(X), Y, s(Z)) :- add (X, Y, Z).
 
 -- Multiplication
 mul (o, X, o).  
-mul (s(X), Y,  T) :- mul (X, Y, Z), add (Y, Z, T).
+mul (s(X), o, o).
+mul (s(X), s(Y), Z) :- add (s(Y), T, Z), mul (X, s(Y), T).  
 
+semimul (o, X, o).
+semimul (s(X), o, o).
+semimul (s(X), s(Y), Z) :- lt (X, Z), lt (Y, s (X)), mul (s(X), s(Y), Z).  
+  
 -- Common divisor
 cd   (X, Y, Z) :- le (A, X), le (B, Y), le (Z, X), le (Z, Y), mul (Z, A, X), mul (Z, B, Y).
 nld  (Z, X, Y) :- cd (X, Y, Z), cd (X, Y, Z1), lt (Z1, Z).

@@ -68,7 +68,7 @@ let _ =
             Printf.printf "Continue (y/n)? ";
             let a = read_line () in
 	    if a = "y" || a = "Y" then iterate conf
-      in iterate ([0, SLD.extend goal, Unify.empty, env#clauses], [])
+      in iterate ([0, SLD.extend goal, Unify.empty, [], env#clauses], [])
   in
   while true do
     try

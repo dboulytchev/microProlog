@@ -55,8 +55,8 @@ ostap (
 )
 
 ostap (
-body     : l:!(Ostap.Util.list (ostap(atom | "!" {`Cut}))) {`Body l};
-  clause   : l:atom r:(-":-" body)? "." {
+body     : l:!(Ostap.Util.list (ostap(atom | "!" {`Cut} | t1:term "/=" t2:term {`Diseq (t1, t2)}))) {`Body l};
+clause   : l:atom r:(-":-" body)? "." {
     match r with Some r -> `Clause (l, r) | _ -> `Clause (l, `Body [])
   }   
 )

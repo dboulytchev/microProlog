@@ -1,22 +1,25 @@
-type item  = [ Ast.atom | `Cut of stack ] 
+type item  = [ Ast.atom | `Cut of stack | `Diseq of Ast.term * Ast.term ] 
 and  goal  = item list
-and  state = int * goal * Unify.subst * Ast.clause list
+and  state = int * goal * Unify.subst * ctor * Ast.clause list
 and  stack = state list
+and  ctor  = (Ast.term * Ast.term) list
 
 let extend is =  
   List.map (function
-            | `Cut -> `Cut [] 
-            | #Ast.atom as a -> (a :> item)        
+            | `Cut            -> `Cut []
+            | `Diseq (t1, t2) -> `Diseq (t1, t2)
+            | #Ast.atom as a  -> (a :> item)
            ) is
  
 let pretty_goal goal =
   Ostap.Pretty.listByComma @@
   GT.gmap(GT.list) (function
-                      `Cut _ -> Ostap.Pretty.string "!"
-                    | #Ast.atom as a -> Ast.pretty_atom a
+                      `Cut    _       -> Ostap.Pretty.string "!"
+                    | `Diseq (t1, t2) -> Ast.pretty_body_item (`Diseq (t1, t2))
+                    | #Ast.atom as a  -> Ast.pretty_atom a
                    ) goal
 
-let pretty_state (depth, goal, subst, clauses) =
+let pretty_state (depth, goal, subst, ctor, clauses) =
   Ostap.Pretty.seq [
     Ostap.Pretty.int depth;
     Ostap.Pretty.newline;
@@ -29,6 +32,7 @@ let pretty_stack stack = Ostap.Pretty.seq @@
   GT.gmap(GT.list) (fun s -> Ostap.Pretty.seq [pretty_state s; Ostap.Pretty.newline]) stack
 
 let rec solve env (stack, pruned) =
+  let update_ctor ctor subst = (Unify.subst_to_diseq subst) :: ctor in
   let decorate_cut stack atoms = List.map (function `Cut _ -> `Cut stack | a -> a) atoms in 			
   let rec find (a : Ast.atom) (s : Unify.subst) clauses cut = 
     let name = 
@@ -41,26 +45,27 @@ let rec solve env (stack, pruned) =
     | `Clause (b, `Body bs) :: clauses' ->
         let module M = Map.Make (String) in
         let m = ref M.empty in
-        let rename a =
-          GT.transform(Ast.atom)              
-            (fun self -> object inherit [Ast.atom, _] @Ast.atom[gmap] self
-               method c_Functor _ _ f ts =
-                 `Functor (
-                    f,
-                    GT.gmap(GT.list)
-                       (GT.transform(Ast.term)
-                           (fun self -> object inherit [Ast.term, _] @Ast.term[gmap] self
+        let rename_term t =
+           GT.transform(Ast.term)
+              (fun self -> object inherit [Ast.term, _] @Ast.term[gmap] self
                               method c_Var _ _ x = 
                                 try `Var (M.find x !m)
                                 with Not_found ->
                                   let x' = name x in
                                   m := M.add x x' !m;
                                   `Var x'
-                            end
-                           )
-                           ()
-                       )
-                       ts 
+                           end
+              )
+              ()
+              t
+        in
+        let rename a =
+          GT.transform(Ast.atom)              
+            (fun self -> object inherit [Ast.atom, _] @Ast.atom[gmap] self
+               method c_Functor _ _ f ts =
+                 `Functor (
+                    f,
+                    GT.gmap(GT.list) rename_term ts 
                   )
              end) 
             ()
@@ -70,13 +75,17 @@ let rec solve env (stack, pruned) =
         let bs = 
           List.map (
             function
-            | `Cut -> `Cut cut 
-            | #Ast.atom as a -> (rename a :> item)
+            | `Cut            -> `Cut cut
+            | `Diseq (t1, t2) -> `Diseq (rename_term t1, rename_term t2)
+            | #Ast.atom as a  -> (rename a :> item)
           ) bs 
         in
         match Unify.unify (Some s) (Ast.to_term a) (Ast.to_term b) with
         | None    -> inner clauses'
-        | Some s' -> Some (s', bs, clauses')
+        | Some s' ->
+           if Unify.is_empty s'
+           then Some (s', bs, clauses')
+           else invalid_arg "Constraint store!"
     in
     inner clauses
   in
@@ -85,19 +94,28 @@ let rec solve env (stack, pruned) =
   env#wait;
   match stack with
   | [] -> (match pruned with [] -> `End | _ -> solve env (pruned, []))
-  | (depth, goal, subst, clauses)::stack when env#check_depth depth ->
+  | (depth, goal, subst, ctor, clauses)::stack when env#check_depth depth ->
       (match goal with
        | [] -> `Answer (subst, (stack, pruned))
        | a::atoms ->
           (match a with
-           | `Cut cut -> solve env ((depth, atoms, subst, clauses) :: cut, pruned)
+           | `Cut cut -> solve env ((depth, atoms, subst, ctor, clauses) :: cut, pruned)
+           | `Diseq (t1, t2) ->
+              (match Unify.unify (Some subst) t1 t2 with
+               | None -> solve env ((depth, atoms, subst, ctor, clauses) :: stack, pruned)
+               | Some subst' ->
+                  if Unify.is_empty subst'
+                  then solve env (stack, pruned)
+                  else solve env ((depth, atoms, subst, update_ctor ctor subst', clauses) :: stack, pruned)  
+              )
+              
            | #Ast.atom as a ->
              (match find a subst clauses stack with
               | None -> solve env (stack, pruned)
               | Some (subst', btoms, clauses') ->
-                  let stack' = (depth, goal, subst, clauses')::stack in
+                  let stack' = (depth, goal, subst, ctor, clauses')::stack in
                   solve env @@ (
-                     (depth+1, (decorate_cut stack (* ' *) btoms) @ atoms, subst', env#clauses)::stack',
+                     (depth+1, (decorate_cut stack btoms) @ atoms, subst', ctor, env#clauses)::stack',
                      pruned
                   )
               )
