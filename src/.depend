@@ -18,12 +18,8 @@ PEnv.cmx : \
     Ast.cmx
 PParser.cmo :
 PParser.cmx :
-SLD.cmo : \
-    Unify.cmo \
-    Ast.cmo
-SLD.cmx : \
-    Unify.cmx \
-    Ast.cmx
+SLD.cmo :
+SLD.cmx :
 Unify.cmo : \
     Ast.cmo
 Unify.cmx : \

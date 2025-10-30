@@ -85,7 +85,21 @@ let rec solve env (stack, pruned) =
         | Some s' ->
            if Unify.is_empty s'
            then Some (s', bs, clauses')
-           else invalid_arg "Constraint store!"
+           else
+             (try 
+                let ctor' = List.flatten @@ List.map
+                              (fun (t1, t2) ->
+                                 match Unify.unify (Some s') t1 t2 with
+                                 | None -> []
+                                 | Some s'' ->
+                                    if Unify.is_empty s''
+                                    then raise Disequality_violated
+                                    else [Unify.subst_to_diseq s'']
+                              )
+                              ctor
+                in
+              with Disequality_violated -> inner clauses'
+             )
     in
     inner clauses
   in
