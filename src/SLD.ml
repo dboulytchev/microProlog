@@ -6,6 +6,17 @@ and  ctor  = (Ast.term * Ast.term) list
 
 exception Disequality_violated
 
+let apply_to_goal subst goal =
+  List.map (function
+            | `Cut st         -> `Cut st
+            | `Diseq (t1, t2) -> `Diseq (Unify.apply subst t1, Unify.apply subst t2)
+            | #Ast.atom as a  ->
+               (match Unify.apply subst (Ast.to_term a) with
+                | `Functor (s, ts) -> `Functor (s, ts)
+                | _                -> invalid_arg "** should not happen ***"
+               )
+            ) goal
+
 let extend is =  
   List.map (function
             | `Cut            -> `Cut []
@@ -21,27 +32,39 @@ let pretty_goal goal =
                     | #Ast.atom as a  -> Ast.pretty_atom a
                    ) goal
 
+let pretty_ctor = function
+  | [] -> Ostap.Pretty.empty
+  | ctor ->
+    Ostap.Pretty.plock
+      (Ostap.Pretty.string "Constraints:")
+      (Ostap.Pretty.listByBreak @@
+         List.map
+           (function
+            | (`Functor (_, ts1), `Functor (_, ts2)) ->
+                Ostap.Pretty.listBy (Ostap.Pretty.string " & " ) @@
+                List.map
+                  (fun (t1, t2) ->
+                     Ostap.Pretty.seq [
+                       Ast.pretty_term t1;
+                       Ostap.Pretty.string "/=";
+                       Ast.pretty_term t2
+                     ]
+                  ) @@
+                  List.combine ts1 ts2
+            | _ -> invalid_arg "*** should not happen ***"
+           )
+          ctor
+      )
+
 let pretty_state (depth, goal, subst, ctor, clauses) =
   Ostap.Pretty.seq [
     Ostap.Pretty.int depth;
-    Ostap.Pretty.newline;
-    pretty_goal goal;
-    Ostap.Pretty.newline;
+    (*    Ostap.Pretty.newline; *)
+    Ostap.Pretty.seq [Ostap.Pretty.string "Current goal: "; pretty_goal @@ apply_to_goal subst goal];
+(*    Ostap.Pretty.newline; *)
     Unify.pretty_subst (Some subst);
-    Ostap.Pretty.newline;
-    Ostap.Pretty.listByComma (
-      List.map
-        (fun (t1, t2) ->
-          Ostap.Pretty.rboxed (
-            Ostap.Pretty.seq [
-              Ast.pretty_term t1;
-              Ostap.Pretty.string ", ";
-              Ast.pretty_term t2
-            ]
-          )
-        )
-      ctor
-    )
+    (*  Ostap.Pretty.newline;*)
+    pretty_ctor ctor;
   ]
 
 let pretty_stack stack = Ostap.Pretty.seq @@

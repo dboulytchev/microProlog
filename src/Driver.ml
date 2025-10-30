@@ -61,7 +61,7 @@ let _ =
 		   (fun x ->
 		      Printf.printf "%s = %s\n" 
                         x
-                        (Ostap.Pretty.toString (Ast.pretty_term (Unify.walk' s (`Var x)))) 
+                        (Ostap.Pretty.toString (Ast.pretty_term (Unify.apply s (`Var x)))) 
                    ) 
 		   vars
             );

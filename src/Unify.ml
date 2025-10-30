@@ -30,14 +30,16 @@ let rec walk : subst -> Ast.term -> Ast.term = fun s x ->
   | `Var y -> (try walk s (M.find y s) with Not_found -> x)
   | _ -> x
 
-let walk' : subst -> Ast.term -> Ast.term = fun s x -> 
+let apply : subst -> Ast.term -> Ast.term = fun s x -> 
  GT.transform(Ast.term) 
-    (fun self -> object inherit [Ast.term, _] @Ast.term[gmap] self
-       method c_Var _ v x = 
-         try self () (M.find x s) with Not_found -> `Var x
-     end) 
-    () 
-    x
+   (fun self ->
+      object inherit [Ast.term, _] @Ast.term[gmap] self
+        method c_Var _ v x = 
+          try self () (M.find x s) with Not_found -> `Var x
+      end
+   ) 
+   () 
+   x
 
 let occurs : subst -> string -> Ast.term -> bool = fun s x t ->
   try 
