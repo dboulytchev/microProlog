@@ -4,6 +4,8 @@ and  state = int * goal * Unify.subst * ctor * Ast.clause list
 and  stack = state list
 and  ctor  = (Ast.term * Ast.term) list
 
+exception Disequality_violated
+
 let extend is =  
   List.map (function
             | `Cut            -> `Cut []
@@ -25,7 +27,21 @@ let pretty_state (depth, goal, subst, ctor, clauses) =
     Ostap.Pretty.newline;
     pretty_goal goal;
     Ostap.Pretty.newline;
-    Unify.pretty_subst (Some subst) 
+    Unify.pretty_subst (Some subst);
+    Ostap.Pretty.newline;
+    Ostap.Pretty.listByComma (
+      List.map
+        (fun (t1, t2) ->
+          Ostap.Pretty.rboxed (
+            Ostap.Pretty.seq [
+              Ast.pretty_term t1;
+              Ostap.Pretty.string ", ";
+              Ast.pretty_term t2
+            ]
+          )
+        )
+      ctor
+    )
   ]
 
 let pretty_stack stack = Ostap.Pretty.seq @@
@@ -34,7 +50,7 @@ let pretty_stack stack = Ostap.Pretty.seq @@
 let rec solve env (stack, pruned) =
   let update_ctor ctor subst = (Unify.subst_to_diseq subst) :: ctor in
   let decorate_cut stack atoms = List.map (function `Cut _ -> `Cut stack | a -> a) atoms in 			
-  let rec find (a : Ast.atom) (s : Unify.subst) clauses cut = 
+  let rec find (a : Ast.atom) (s : Unify.subst) ctor clauses cut = 
     let name = 
       let i = env#index in
       fun s -> Printf.sprintf "$%d_%s" i s 
@@ -84,7 +100,7 @@ let rec solve env (stack, pruned) =
         | None    -> inner clauses'
         | Some s' ->
            if Unify.is_empty s'
-           then Some (s', bs, clauses')
+           then Some (s', bs, ctor, clauses')
            else
              (try 
                 let ctor' = List.flatten @@ List.map
@@ -98,6 +114,7 @@ let rec solve env (stack, pruned) =
                               )
                               ctor
                 in
+                Some (s', bs, ctor', clauses')
               with Disequality_violated -> inner clauses'
              )
     in
@@ -124,12 +141,12 @@ let rec solve env (stack, pruned) =
               )
               
            | #Ast.atom as a ->
-             (match find a subst clauses stack with
+             (match find a subst ctor clauses stack with
               | None -> solve env (stack, pruned)
-              | Some (subst', btoms, clauses') ->
+              | Some (subst', btoms, ctor', clauses') ->
                   let stack' = (depth, goal, subst, ctor, clauses')::stack in
                   solve env @@ (
-                     (depth+1, (decorate_cut stack btoms) @ atoms, subst', ctor, env#clauses)::stack',
+                     (depth+1, (decorate_cut stack btoms) @ atoms, subst', ctor', env#clauses)::stack',
                      pruned
                   )
               )

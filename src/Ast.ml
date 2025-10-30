@@ -19,13 +19,30 @@ let to_term : atom -> term = fun a -> (a :> term)
 class pretty_term self =
   object inherit [unit, term, Ostap.Pretty.printer] @term 
     method c_Var _ _ s = Ostap.Pretty.string s
-    method c_Functor s _ f ts = 
-      Ostap.Pretty.listBySpace [
-        Ostap.Pretty.string f;
-        match ts with
-        | [] -> Ostap.Pretty.empty
-        | ys -> Ostap.Pretty.rboxed (Ostap.Pretty.listByComma (List.map (self s) ts))
-      ]        
+    method c_Functor s same f ts =
+      match f with
+      | "[]" -> Ostap.Pretty.string "[]"
+      | "::" ->         
+         let rec pull_out acc = function
+         | `Functor ("::", [h; t]) -> pull_out (h :: acc) t
+         | other -> (acc, other)
+         in
+         let prefix, tail = pull_out [] same in        
+         Ostap.Pretty.sboxed (
+           Ostap.Pretty.seq [
+            Ostap.Pretty.listByComma (List.map (self s) (List.rev prefix));
+            match tail with
+            | `Functor ("[]", []) -> Ostap.Pretty.empty
+            | _                   -> Ostap.Pretty.seq [Ostap.Pretty.string " | "; self s tail]
+           ]
+         )         
+      | _    ->
+         Ostap.Pretty.listBySpace [
+           Ostap.Pretty.string f;
+           match ts with
+           | [] -> Ostap.Pretty.empty
+           | ys -> Ostap.Pretty.rboxed (Ostap.Pretty.listByComma (List.map (self s) ts))
+         ]        
   end
 
 let pretty_term t = GT.transform(term) (new pretty_term) () t
