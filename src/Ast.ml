@@ -96,9 +96,9 @@ class pretty_clause =
 
 let pretty_clause c = GT.transform(clause) (GT.lift @@ new pretty_clause) () c
 
+module S = Set.Make (String)
+
 let vars atoms =
-  let module S = Set.Make (String) in
-  S.elements @@
   GT.foldl(GT.list) 
     (GT.transform(body_item)
        (fun self -> object inherit [S.t, _] @body_item[foldl] self
@@ -116,3 +116,7 @@ let vars atoms =
     ) 
     S.empty 
     atoms
+
+let fv = function
+| `Var _ as x -> vars [`Functor ("", [x])]
+| #atom  as t -> vars [t]

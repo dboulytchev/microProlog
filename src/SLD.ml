@@ -6,6 +6,27 @@ and  ctor  = (Ast.term * Ast.term) list
 
 exception Disequality_violated
 
+let reify_ctor ctor fv =
+  let rec inner (visited, remaining, result, fv) =
+    let fv = Ast.S.diff fv visited in
+    if Ast.S.is_empty fv
+    then result
+    else
+      let next =
+        List.fold_left
+          (fun (visited, remaining, result, fv') ((t1, t2) as c) ->
+             let vars = Ast.fv (`Functor ("", [t1; t2])) in
+             if Ast.S.is_empty (Ast.S.inter vars fv)
+             then (Ast.S.union vars visited, c::remaining, result, fv')
+             else (Ast.S.union vars visited, remaining, c::result, Ast.S.union fv' vars)
+          )
+          (visited, [], result, Ast.S.empty)
+          remaining
+      in
+      inner next
+  in
+  inner (Ast.S.empty, ctor, [], fv) 
+
 let apply_to_goal subst goal =
   List.map (function
             | `Cut st         -> `Cut st
@@ -37,7 +58,7 @@ let pretty_ctor = function
   | ctor ->
     Ostap.Pretty.plock
       (Ostap.Pretty.string "Constraints:")
-      (Ostap.Pretty.listByBreak @@
+      (Ostap.Pretty.listBy (Ostap.Pretty.string " | ")  @@
          List.map
            (function
             | (`Functor (_, ts1), `Functor (_, ts2)) ->
@@ -150,12 +171,12 @@ let rec solve env (stack, pruned) =
   | [] -> (match pruned with [] -> `End | _ -> solve env (pruned, []))
   | (depth, goal, subst, ctor, clauses)::stack when env#check_depth depth ->
       (match goal with
-       | [] -> `Answer (subst, (stack, pruned))
+       | [] -> `Answer (subst, ctor, (stack, pruned))
        | a::atoms ->
           (match a with
            | `Cut cut -> solve env ((depth, atoms, subst, ctor, clauses) :: cut, pruned)
            | `Diseq (t1, t2) ->
-              (match Unify.unify (Some subst) t1 t2 with
+              (match Unify.unify (Some Unify.empty) (Unify.apply subst t1) (Unify.apply subst t2) with
                | None -> solve env ((depth, atoms, subst, ctor, clauses) :: stack, pruned)
                | Some subst' ->
                   if Unify.is_empty subst'
