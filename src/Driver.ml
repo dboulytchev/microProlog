@@ -49,19 +49,24 @@ let _ =
       Printf.printf "%s\n" 
 	(Ostap.Pretty.toString (Unify.pretty_subst (Unify.unify (Some Unify.empty) x y)))
   | `Query (`Body goal) ->
-      let vars = Ast.vars goal in 
+      let vars = Ast.S.elements @@ Ast.vars goal in 
       let rec iterate conf =
         match SLD.solve env conf with
         | `End -> Printf.printf "No (more) answers.\n%!"
-        | `Answer (s, conf) ->
+        | `Answer (s, ctor, conf) ->
 	    (match vars with
 	     | [] -> Printf.printf "yes\n"
 	     | _  -> 
 		List.iter 
 		   (fun x ->
-		      Printf.printf "%s = %s\n" 
-                        x
-                        (Ostap.Pretty.toString (Ast.pretty_term (Unify.apply s (`Var x)))) 
+                      let term  = Unify.apply s (`Var x)                       in
+                      let sterm = Ostap.Pretty.toString (Ast.pretty_term term) in
+                      let fv    = Ast.fv term                                  in
+                      let ctor  = SLD.reify_ctor ctor fv                       in
+                      match ctor with 
+		      | []  -> Printf.printf "%s = %s\n" x sterm
+                      | _   -> Printf.printf "%s = %s (%s)\n" x sterm
+                                 (Ostap.Pretty.toString @@ SLD.pretty_ctor ctor)
                    ) 
 		   vars
             );
