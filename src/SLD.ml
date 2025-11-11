@@ -155,7 +155,7 @@ let rec solve env (stack, pruned) =
           (match a with
            | `Cut cut -> solve env ((depth, atoms, subst, ctor, clauses) :: cut, pruned)
            | `Diseq (t1, t2) ->
-              (match Unify.unify (Some subst) t1 t2 with
+              (match Unify.unify (Some Unify.empty) (Unify.apply subst t1) (Unify.apply subst t2) with
                | None -> solve env ((depth, atoms, subst, ctor, clauses) :: stack, pruned)
                | Some subst' ->
                   if Unify.is_empty subst'
